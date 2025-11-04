@@ -277,6 +277,24 @@ echo -e "${GREEN}✓ pyannote.audio upgraded successfully${NC}"
 echo ""
 
 # ==============================================================================
+# Step 7.6: Fix PyTorch Version Conflicts
+# ==============================================================================
+# WhisperX requires torch~=2.8.0, which downgrades PyTorch from 2.9.0 to 2.8.0.
+# This breaks torchvision 0.24.0 which requires torch==2.9.0.
+# Force reinstall PyTorch 2.9.0 nightly to fix the conflict.
+# This works because WhisperX actually runs fine with 2.9.0 despite its metadata.
+# ==============================================================================
+echo -e "${YELLOW}[7.6/10] Fixing PyTorch version conflicts...${NC}"
+echo "WhisperX downgraded PyTorch to 2.8.0, reinstalling 2.9.0 nightly for compatibility"
+if [ "$HAS_NVIDIA" = true ]; then
+    pip install --force-reinstall --no-deps torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+else
+    pip install --force-reinstall --no-deps torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
+fi
+echo -e "${GREEN}✓ PyTorch versions fixed${NC}"
+echo ""
+
+# ==============================================================================
 # Step 8: LD_LIBRARY_PATH Configuration (NVIDIA Only)
 # ==============================================================================
 # PyTorch nightly packages cuDNN as a separate pip package in nvidia/cudnn/lib.
