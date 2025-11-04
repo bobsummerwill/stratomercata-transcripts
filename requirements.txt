@@ -1,31 +1,31 @@
 # ==============================================================================
-# RTX 5070 / Blackwell Architecture Requirements
+# WhisperX Requirements - Hardware-Agnostic
 # ==============================================================================
 #
-# For complete lock file with exact versions: requirements-lock.txt
-# To generate: pip install -r requirements.txt && pip freeze > requirements-lock.txt
+# This project now uses split requirements files for different hardware:
+#
+# - requirements-nvidia.txt  → PyTorch nightly with CUDA (for NVIDIA GPUs)
+# - requirements-cpu.txt     → PyTorch nightly CPU-only (for non-NVIDIA systems)
+# - requirements-base.txt    → Common packages (whisperx, pyannote, speechbrain)
+#
+# The install_packages_and_venv.sh script automatically detects your hardware
+# and installs the appropriate PyTorch version.
 #
 # ==============================================================================
 
-# PyTorch nightly - REQUIRED for RTX 5070 Blackwell/sm_120 compute capability
-# Stable releases don't support sm_120 yet (as of Nov 2025)
---extra-index-url https://download.pytorch.org/whl/nightly/cu128
-torch --pre
-torchvision --pre
-torchaudio --pre
-
-# WhisperX (latest git) - PyPI version 3.7.4 outdated, needs patches for pyannote.audio 4.0.1
-# Pulls in faster-whisper, transformers, ctranslate2
-whisperx @ git+https://github.com/m-bain/whisperx.git
-
-# pyannote.audio 4.0.1+ - REQUIRED for PyTorch 2.10+ compatibility
-# Older versions (3.x) incompatible with PyTorch nightly
-# Pulls in: pyannote.core, pyannote.database, pytorch-lightning, opentelemetry, numpy>=2.0, pandas, scipy
-pyannote.audio>=4.0.1
-
-# SpeechBrain (latest git) - PyPI version may have PyTorch 2.10+ compatibility issues
-# Pulls in torch-audiomentations, torchaudio-augmentations
-speechbrain @ git+https://github.com/speechbrain/speechbrain.git
-
-# Post-Installation: Run install_packages_and_venv.sh or manually apply WhisperX patches
-# See SETUP_RTX_5070.md for complete setup instructions
+# AUTOMATED INSTALLATION (RECOMMENDED):
+#   ./install_packages_and_venv.sh
+#
+# MANUAL INSTALLATION:
+#   For NVIDIA GPUs:
+#     pip install -r requirements-nvidia.txt
+#     pip install -r requirements-base.txt
+#
+#   For CPU-only systems:
+#     pip install -r requirements-cpu.txt
+#     pip install -r requirements-base.txt
+#
+# For locked versions: see requirements-lock.txt
+# For setup guide: see SETUP_RTX_5070.md
+#
+# ==============================================================================

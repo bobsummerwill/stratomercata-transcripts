@@ -1,10 +1,10 @@
 #!/bin/bash
 # ==============================================================================
-# Python Environment Setup Script for RTX 5070 WhisperX Transcription
+# Python Environment Setup Script for WhisperX Transcription
 # ==============================================================================
 #
-# This script sets up the complete Python environment for WhisperX with RTX 5070.
-# Run this AFTER installing NVIDIA drivers and rebooting.
+# This script sets up the complete Python environment for WhisperX.
+# Works with NVIDIA GPUs (including RTX 5070) or CPU-only systems.
 #
 # Usage:
 #   ./install_packages_and_venv.sh
@@ -27,25 +27,22 @@ PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 VENV_DIR="$PROJECT_DIR/venv"
 
 echo -e "${BLUE}========================================${NC}"
-echo -e "${BLUE}Python Environment Setup for RTX 5070${NC}"
+echo -e "${BLUE}Python Environment Setup for WhisperX${NC}"
 echo -e "${BLUE}========================================${NC}"
 echo ""
 
-# Step 1: Verify NVIDIA driver
-echo -e "${YELLOW}[1/10] Verifying NVIDIA driver installation...${NC}"
-if ! command -v nvidia-smi &> /dev/null; then
-    echo -e "${RED}ERROR: nvidia-smi not found. Please run install_nvidia_drivers.sh first.${NC}"
-    exit 1
+# Step 1: Detect hardware and install PyTorch
+echo -e "${YELLOW}[1/10] Detecting hardware and installing PyTorch...${NC}"
+if command -v nvidia-smi &> /dev/null && nvidia-smi &> /dev/null; then
+    HAS_NVIDIA=true
+    GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || echo "NVIDIA GPU")
+    echo -e "${GREEN}✓ Detected NVIDIA GPU: $GPU_NAME${NC}"
+    echo "Installing PyTorch nightly with CUDA 12.8..."
+else
+    HAS_NVIDIA=false
+    echo -e "${YELLOW}⚠ No NVIDIA GPU detected - using CPU mode${NC}"
+    echo "Installing PyTorch nightly (CPU)..."
 fi
-
-if ! nvidia-smi &> /dev/null; then
-    echo -e "${RED}ERROR: nvidia-smi failed. Driver may not be loaded correctly.${NC}"
-    echo "Try rebooting or reinstalling the driver."
-    exit 1
-fi
-
-echo -e "${GREEN}✓ NVIDIA driver verification:${NC}"
-nvidia-smi --query-gpu=name,driver_version --format=csv,noheader
 echo ""
 
 # Step 2: Install system dependencies
@@ -68,32 +65,36 @@ echo ""
 # Activate virtual environment
 source "$VENV_DIR/bin/activate"
 
-# Step 4: Install PyTorch nightly
-echo -e "${YELLOW}[4/10] Installing PyTorch nightly with CUDA 12.8...${NC}"
+# Step 4: Install PyTorch (hardware-appropriate)
+echo -e "${YELLOW}[4/10] Installing PyTorch nightly...${NC}"
 echo "This may take 2-5 minutes depending on internet speed..."
-pip install --pre torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+if [ "$HAS_NVIDIA" = true ]; then
+    pip install -r "$PROJECT_DIR/requirements-nvidia.txt"
+else
+    pip install -r "$PROJECT_DIR/requirements-cpu.txt"
+fi
 echo -e "${GREEN}✓ PyTorch nightly installed${NC}"
 echo ""
 
 # Step 5: Verify PyTorch installation
 echo -e "${YELLOW}[5/10] Verifying PyTorch installation...${NC}"
 python3 -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')"
-if ! python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'" 2>/dev/null; then
-    echo -e "${RED}ERROR: PyTorch cannot detect CUDA/GPU${NC}"
-    exit 1
+if [ "$HAS_NVIDIA" = true ]; then
+    if ! python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'" 2>/dev/null; then
+        echo -e "${RED}ERROR: PyTorch cannot detect CUDA/GPU${NC}"
+        exit 1
+    fi
+    echo -e "${GREEN}✓ PyTorch can use GPU${NC}"
+else
+    echo -e "${GREEN}✓ PyTorch CPU installed${NC}"
 fi
-echo -e "${GREEN}✓ PyTorch can use GPU${NC}"
 echo ""
 
-# Step 6: Install Python dependencies
-echo -e "${YELLOW}[6/10] Installing Python dependencies from requirements-lock.txt...${NC}"
+# Step 6: Install common packages
+echo -e "${YELLOW}[6/10] Installing common packages from requirements-base.txt...${NC}"
 echo "This may take 5-10 minutes..."
-if [ ! -f "$PROJECT_DIR/requirements-lock.txt" ]; then
-    echo -e "${RED}ERROR: requirements-lock.txt not found in $PROJECT_DIR${NC}"
-    exit 1
-fi
-pip install -r "$PROJECT_DIR/requirements-lock.txt"
-echo -e "${GREEN}✓ Python dependencies installed${NC}"
+pip install -r "$PROJECT_DIR/requirements-base.txt"
+echo -e "${GREEN}✓ Common packages installed${NC}"
 echo ""
 
 # Step 7: Apply WhisperX patches
@@ -125,33 +126,42 @@ fi
 echo -e "${GREEN}✓ WhisperX patches applied successfully${NC}"
 echo ""
 
-# Step 8: Configure LD_LIBRARY_PATH
-echo -e "${YELLOW}[8/10] Configuring LD_LIBRARY_PATH...${NC}"
-BASHRC="$HOME/.bashrc"
-LD_PATH_LINE="export LD_LIBRARY_PATH=$PROJECT_DIR/venv/lib/python3.12/site-packages/nvidia/cudnn/lib:\$LD_LIBRARY_PATH"
+# Step 8: Configure LD_LIBRARY_PATH (NVIDIA only)
+if [ "$HAS_NVIDIA" = true ]; then
+    echo -e "${YELLOW}[8/10] Configuring LD_LIBRARY_PATH for NVIDIA...${NC}"
+    BASHRC="$HOME/.bashrc"
+    LD_PATH_LINE="export LD_LIBRARY_PATH=$PROJECT_DIR/venv/lib/python3.12/site-packages/nvidia/cudnn/lib:\$LD_LIBRARY_PATH"
 
-if grep -q "nvidia/cudnn/lib" "$BASHRC" 2>/dev/null; then
-    echo "LD_LIBRARY_PATH already configured in ~/.bashrc"
+    if grep -q "nvidia/cudnn/lib" "$BASHRC" 2>/dev/null; then
+        echo "LD_LIBRARY_PATH already configured in ~/.bashrc"
+    else
+        echo "" >> "$BASHRC"
+        echo "# Added by install_packages_and_venv.sh for PyTorch nightly cuDNN" >> "$BASHRC"
+        echo "$LD_PATH_LINE" >> "$BASHRC"
+        echo -e "${GREEN}✓ LD_LIBRARY_PATH added to ~/.bashrc${NC}"
+    fi
+
+    # Set for current session
+    export LD_LIBRARY_PATH="$VENV_DIR/lib/python3.12/site-packages/nvidia/cudnn/lib:$LD_LIBRARY_PATH"
+    echo -e "${GREEN}✓ LD_LIBRARY_PATH configured${NC}"
 else
-    echo "" >> "$BASHRC"
-    echo "# Added by install_packages_and_venv.sh for PyTorch nightly cuDNN" >> "$BASHRC"
-    echo "$LD_PATH_LINE" >> "$BASHRC"
-    echo -e "${GREEN}✓ LD_LIBRARY_PATH added to ~/.bashrc${NC}"
+    echo -e "${YELLOW}[8/10] Skipping LD_LIBRARY_PATH (not needed for CPU)${NC}"
 fi
-
-# Set for current session
-export LD_LIBRARY_PATH="$VENV_DIR/lib/python3.12/site-packages/nvidia/cudnn/lib:$LD_LIBRARY_PATH"
-echo -e "${GREEN}✓ LD_LIBRARY_PATH configured${NC}"
 echo ""
 
 # Step 9: Run verification tests
 echo -e "${YELLOW}[9/10] Running verification tests...${NC}"
 
-echo "Testing GPU..."
-python3 -c "import torch; x = torch.randn(100,100, device='cuda'); print('✓ GPU test passed:', x.matmul(x).sum().item())"
+if [ "$HAS_NVIDIA" = true ]; then
+    echo "Testing GPU..."
+    python3 -c "import torch; x = torch.randn(100,100, device='cuda'); print('✓ GPU test passed:', x.matmul(x).sum().item())"
 
-echo "Testing cuDNN..."
-python3 -c "import torch.backends.cudnn as cudnn; print('✓ cuDNN version:', cudnn.version()); print('✓ cuDNN enabled:', cudnn.is_available())"
+    echo "Testing cuDNN..."
+    python3 -c "import torch.backends.cudnn as cudnn; print('✓ cuDNN version:', cudnn.version()); print('✓ cuDNN enabled:', cudnn.is_available())"
+else
+    echo "Testing CPU..."
+    python3 -c "import torch; x = torch.randn(100,100); print('✓ CPU test passed:', x.matmul(x).sum().item())"
+fi
 
 echo "Testing WhisperX import..."
 python3 -c "import whisperx; print('✓ WhisperX imported successfully')"

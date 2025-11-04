@@ -1,0 +1,24 @@
+# ==============================================================================
+# Common Packages - For All Hardware Types
+# ==============================================================================
+#
+# These packages work with any PyTorch installation (NVIDIA GPU or CPU)
+# Install AFTER installing PyTorch from requirements-nvidia.txt or requirements-cpu.txt
+#
+# ==============================================================================
+
+# WhisperX (latest git) - PyPI version 3.7.4 outdated, needs patches for pyannote.audio 4.0.1
+# Pulls in faster-whisper, transformers, ctranslate2
+whisperx @ git+https://github.com/m-bain/whisperx.git
+
+# pyannote.audio 4.0.1+ - REQUIRED for PyTorch 2.10+ compatibility
+# Older versions (3.x) incompatible with PyTorch nightly
+# Pulls in: pyannote.core, pyannote.database, pytorch-lightning, opentelemetry, numpy>=2.0, pandas, scipy
+pyannote.audio>=4.0.1
+
+# SpeechBrain (latest git) - PyPI version may have PyTorch 2.10+ compatibility issues
+# Pulls in torch-audiomentations, torchaudio-augmentations
+speechbrain @ git+https://github.com/speechbrain/speechbrain.git
+
+# Post-Installation: Run install_packages_and_venv.sh or manually apply WhisperX patches
+# See SETUP_RTX_5070.md for complete setup instructions
