@@ -109,7 +109,7 @@ shellingham==1.5.4
 six==1.17.0
 sortedcontainers==2.4.0
 soundfile==0.13.1
-speechbrain @ git+https://github.com/speechbrain/speechbrain.git@c6d2a8b1836dd86d06404c67d211e518a82fc407
+speechbrain==1.0.3
 SQLAlchemy==2.0.44
 sympy==1.14.0
 tabulate==0.9.0
@@ -130,6 +130,6 @@ typer==0.20.0
 typing_extensions==4.15.0
 tzdata==2025.2
 urllib3==2.5.0
-whisperx @ git+https://github.com/m-bain/whisperx.git@d32ec3e3012ec4c0934f4088424c32f3f038b249
+whisperx==3.7.4
 yarl==1.22.0
 zipp==3.23.0

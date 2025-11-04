@@ -109,20 +109,20 @@ shellingham==1.5.4
 six==1.17.0
 sortedcontainers==2.4.0
 soundfile==0.13.1
-speechbrain @ git+https://github.com/speechbrain/speechbrain.git@c6d2a8b1836dd86d06404c67d211e518a82fc407
+speechbrain==1.0.3
 SQLAlchemy==2.0.44
 sympy==1.14.0
 tabulate==0.9.0
 tensorboardX==2.6.4
 threadpoolctl==3.6.0
 tokenizers==0.22.1
-torch==2.10.0.dev20251104+cu128
+torch==2.10.0.dev20251104+cu130
 torch-audiomentations==0.12.0
 torch_pitch_shift==1.2.5
-torchaudio==2.10.0.dev20251104+cu128
+torchaudio==2.10.0.dev20251104+cu130
 torchcodec==0.8.1
 torchmetrics==1.8.2
-torchvision==0.25.0.dev20251104+cu128
+torchvision==0.25.0.dev20251104+cu130
 tqdm==4.67.1
 transformers==4.57.1
 triton==3.4.0
@@ -130,6 +130,6 @@ typer==0.20.0
 typing_extensions==4.15.0
 tzdata==2025.2
 urllib3==2.5.0
-whisperx @ git+https://github.com/m-bain/whisperx.git@d32ec3e3012ec4c0934f4088424c32f3f038b249
+whisperx==3.7.4
 yarl==1.22.0
 zipp==3.23.0
