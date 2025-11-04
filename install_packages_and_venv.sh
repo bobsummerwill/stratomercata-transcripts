@@ -29,12 +29,15 @@
 #   - sudo access for system package installation
 #
 # USAGE:
-#   ./install_packages_and_venv.sh              # Auto-detect hardware
-#   ./install_packages_and_venv.sh --force-cpu  # Force CPU-only mode
+#   ./install_packages_and_venv.sh                    # Auto-detect hardware, use lock files
+#   ./install_packages_and_venv.sh --force-cpu        # Force CPU-only mode, use lock files
+#   ./install_packages_and_venv.sh --refresh-lock     # Rebuild packages and regenerate lock files
 #
 # OPTIONS:
-#   --force-cpu    Force CPU-only installation even if NVIDIA GPU is present
-#                  Useful for testing or when you want CPU mode on GPU system
+#   --force-cpu       Force CPU-only installation even if NVIDIA GPU is present
+#                     Useful for testing or when you want CPU mode on GPU system
+#   --refresh-lock    Rebuild all packages from source requirements and regenerate lock files
+#                     Use this when dependencies change or you need to update packages
 #
 # POST-INSTALLATION:
 #   1. Get HuggingFace token: https://huggingface.co/settings/tokens
@@ -65,15 +68,20 @@ VENV_DIR="$PROJECT_DIR/venv"                                   # Virtual environ
 
 # Parse command-line arguments
 FORCE_CPU=false
+REFRESH_LOCK=false
 for arg in "$@"; do
     case $arg in
         --force-cpu)
             FORCE_CPU=true
             shift
             ;;
+        --refresh-lock)
+            REFRESH_LOCK=true
+            shift
+            ;;
         *)
             echo -e "${RED}Error: Unknown option: $arg${NC}"
-            echo "Usage: $0 [--force-cpu]"
+            echo "Usage: $0 [--force-cpu] [--refresh-lock]"
             exit 1
             ;;
     esac
@@ -153,28 +161,44 @@ echo ""
 source "$VENV_DIR/bin/activate"
 
 # ==============================================================================
-# Step 4: PyTorch Installation
+# Step 4: Package Installation
 # ==============================================================================
-# Install PyTorch nightly (not stable) for maximum GPU compatibility.
-# NVIDIA systems get CUDA 12.8 build, CPU systems get CPU-only build.
-# Uses --pre flag to install pre-release (nightly) versions.
-# Nightly is REQUIRED for RTX 5070 Blackwell (sm_120) but used universally.
-# Will switch to stable once PyTorch 2.6+ adds Blackwell support (est. Q1-Q2 2026).
+# By default, install from lock files for fast, reproducible installations.
+# With --refresh-lock, install from source requirements and rebuild lock files.
+# Lock files contain complete frozen dependency tree for deterministic installs.
 # ==============================================================================
-echo -e "${YELLOW}[4/10] Installing PyTorch nightly...${NC}"
-echo "Using PyTorch nightly for all hardware to ensure maximum GPU support"
-echo "REQUIRED for RTX 5070 Blackwell (sm_120), but used universally for consistency"
-echo "Will switch to stable PyTorch once it supports Blackwell (expected: PyTorch 2.6+)"
-echo "This may take 2-5 minutes depending on internet speed..."
-if [ "$HAS_NVIDIA" = true ]; then
-    echo "Installing from: requirements-nvidia.txt (CUDA 12.8)"
-    pip install -r "$PROJECT_DIR/requirements-nvidia.txt"
+if [ "$REFRESH_LOCK" = false ]; then
+    echo -e "${YELLOW}[4/10] Installing packages from lock files...${NC}"
+    echo "Using frozen dependencies for fast, reproducible installation"
+    echo "This may take 2-5 minutes depending on internet speed..."
+    if [ "$HAS_NVIDIA" = true ]; then
+        echo "Installing from: requirements-nvidia-lock.txt (CUDA 12.8)"
+        pip install -r "$PROJECT_DIR/requirements-nvidia-lock.txt"
+    else
+        echo "Installing from: requirements-cpu-lock.txt (CPU-only)"
+        pip install -r "$PROJECT_DIR/requirements-cpu-lock.txt"
+    fi
+    echo -e "${GREEN}✓ Packages installed from lock files${NC}"
+    echo ""
 else
-    echo "Installing from: requirements-cpu.txt (CPU-only)"
-    pip install -r "$PROJECT_DIR/requirements-cpu.txt"
+    # ==============================================================================
+    # Step 4a: PyTorch Installation (--refresh-lock mode)
+    # ==============================================================================
+    echo -e "${YELLOW}[4/10] Installing PyTorch nightly (refresh mode)...${NC}"
+    echo "Using PyTorch nightly for all hardware to ensure maximum GPU support"
+    echo "REQUIRED for RTX 5070 Blackwell (sm_120), but used universally for consistency"
+    echo "Will switch to stable PyTorch once it supports Blackwell (expected: PyTorch 2.6+)"
+    echo "This may take 2-5 minutes depending on internet speed..."
+    if [ "$HAS_NVIDIA" = true ]; then
+        echo "Installing from: requirements-nvidia.txt (CUDA 12.8)"
+        pip install -r "$PROJECT_DIR/requirements-nvidia.txt"
+    else
+        echo "Installing from: requirements-cpu.txt (CPU-only)"
+        pip install -r "$PROJECT_DIR/requirements-cpu.txt"
+    fi
+    echo -e "${GREEN}✓ PyTorch nightly installed${NC}"
+    echo ""
 fi
-echo -e "${GREEN}✓ PyTorch nightly installed${NC}"
-echo ""
 
 # ==============================================================================
 # Step 5: PyTorch Verification
@@ -210,20 +234,27 @@ fi
 echo ""
 
 # ==============================================================================
-# Step 6: Application Packages Installation
+# Step 6: Application Packages Installation (--refresh-lock mode only)
 # ==============================================================================
 # Install WhisperX and its dependencies (pyannote.audio, SpeechBrain).
 # These packages are hardware-agnostic and work with both NVIDIA and CPU.
 # Installed from requirements-base.txt which uses git repos for latest versions.
 # This step takes longest (5-10 min) due to compiling numerous dependencies.
+# Skipped when using lock files since they already contain all packages.
 # ==============================================================================
-echo -e "${YELLOW}[6/10] Installing common packages...${NC}"
-echo "Installing WhisperX, pyannote.audio, and SpeechBrain from requirements-base.txt"
-echo "These packages are hardware-agnostic and work with both NVIDIA and CPU"
-echo "This may take 5-10 minutes..."
-pip install -r "$PROJECT_DIR/requirements-base.txt"
-echo -e "${GREEN}✓ Common packages installed${NC}"
-echo ""
+if [ "$REFRESH_LOCK" = true ]; then
+    echo -e "${YELLOW}[6/10] Installing common packages (refresh mode)...${NC}"
+    echo "Installing WhisperX, pyannote.audio, and SpeechBrain from requirements-base.txt"
+    echo "These packages are hardware-agnostic and work with both NVIDIA and CPU"
+    echo "This may take 5-10 minutes..."
+    pip install -r "$PROJECT_DIR/requirements-base.txt"
+    echo -e "${GREEN}✓ Common packages installed${NC}"
+    echo ""
+else
+    echo -e "${YELLOW}[6/10] Skipping common packages installation${NC}"
+    echo "Already installed from lock file in step 4"
+    echo ""
+fi
 
 # ==============================================================================
 # Step 7: WhisperX Compatibility Patches
@@ -264,35 +295,63 @@ echo -e "${GREEN}✓ WhisperX patches applied successfully${NC}"
 echo ""
 
 # ==============================================================================
-# Step 7.5: Upgrade pyannote.audio (REQUIRED)
+# Step 7.5: Upgrade pyannote.audio (--refresh-lock mode only)
 # ==============================================================================
 # WhisperX initially installs pyannote.audio 3.x (its dependency requirement).
 # Now that patches are applied, upgrade to 4.0.1+ for PyTorch 2.10+ compatibility.
 # This step is done AFTER patching because patches make WhisperX compatible with 4.0.1.
+# Skipped when using lock files since they already have the correct version.
 # ==============================================================================
-echo -e "${YELLOW}[7.5/10] Upgrading pyannote.audio to 4.0.1+...${NC}"
-echo "WhisperX installed pyannote.audio 3.x, upgrading to 4.0.1+ for PyTorch compatibility"
-pip install --upgrade "pyannote.audio>=4.0.1"
-echo -e "${GREEN}✓ pyannote.audio upgraded successfully${NC}"
-echo ""
+if [ "$REFRESH_LOCK" = true ]; then
+    echo -e "${YELLOW}[7.5/10] Upgrading pyannote.audio to 4.0.1+ (refresh mode)...${NC}"
+    echo "WhisperX installed pyannote.audio 3.x, upgrading to 4.0.1+ for PyTorch compatibility"
+    pip install --upgrade "pyannote.audio>=4.0.1"
+    echo -e "${GREEN}✓ pyannote.audio upgraded successfully${NC}"
+    echo ""
+else
+    echo -e "${YELLOW}[7.5/10] Skipping pyannote.audio upgrade${NC}"
+    echo "Already at correct version from lock file"
+    echo ""
+fi
 
 # ==============================================================================
-# Step 7.6: Fix PyTorch Version Conflicts
+# Step 7.6: Fix PyTorch Version Conflicts (--refresh-lock mode only)
 # ==============================================================================
 # WhisperX requires torch~=2.8.0, which downgrades PyTorch from 2.9.0 to 2.8.0.
 # This breaks torchvision 0.24.0 which requires torch==2.9.0.
 # Force reinstall PyTorch 2.9.0 nightly to fix the conflict.
 # This works because WhisperX actually runs fine with 2.9.0 despite its metadata.
+# Skipped when using lock files since they already have compatible versions.
 # ==============================================================================
-echo -e "${YELLOW}[7.6/10] Fixing PyTorch version conflicts...${NC}"
-echo "WhisperX downgraded PyTorch to 2.8.0, reinstalling 2.9.0 nightly for compatibility"
-if [ "$HAS_NVIDIA" = true ]; then
-    pip install --force-reinstall --no-deps torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+if [ "$REFRESH_LOCK" = true ]; then
+    echo -e "${YELLOW}[7.6/10] Fixing PyTorch version conflicts (refresh mode)...${NC}"
+    echo "WhisperX downgraded PyTorch to 2.8.0, reinstalling 2.9.0 nightly for compatibility"
+    if [ "$HAS_NVIDIA" = true ]; then
+        pip install --force-reinstall --no-deps torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cu128
+    else
+        pip install --force-reinstall --no-deps torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
+    fi
+    echo -e "${GREEN}✓ PyTorch versions fixed${NC}"
+    echo ""
+    
+    # ==============================================================================
+    # Step 7.7: Regenerate Lock Files (--refresh-lock mode only)
+    # ==============================================================================
+    echo -e "${YELLOW}[7.7/10] Regenerating lock files...${NC}"
+    echo "Creating frozen dependency snapshot for future fast installations"
+    if [ "$HAS_NVIDIA" = true ]; then
+        pip freeze > "$PROJECT_DIR/requirements-nvidia-lock.txt"
+        echo -e "${GREEN}✓ Generated requirements-nvidia-lock.txt${NC}"
+    else
+        pip freeze > "$PROJECT_DIR/requirements-cpu-lock.txt"
+        echo -e "${GREEN}✓ Generated requirements-cpu-lock.txt${NC}"
+    fi
+    echo ""
 else
-    pip install --force-reinstall --no-deps torch torchvision torchaudio --index-url https://download.pytorch.org/whl/nightly/cpu
+    echo -e "${YELLOW}[7.6/10] Skipping PyTorch version fix${NC}"
+    echo "Already at correct versions from lock file"
+    echo ""
 fi
-echo -e "${GREEN}✓ PyTorch versions fixed${NC}"
-echo ""
 
 # ==============================================================================
 # Step 8: LD_LIBRARY_PATH Configuration (NVIDIA Only)
