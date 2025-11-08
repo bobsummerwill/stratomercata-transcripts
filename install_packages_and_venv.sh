@@ -266,9 +266,8 @@ echo ""
 # ==============================================================================
 # Step 8: Package Upgrades for Compatibility
 # ==============================================================================
-# After WhisperX installation, perform necessary upgrades for compatibility.
-# Upgrade pyannote.audio 3.x to 4.0.0+ for PyTorch 2.9.0 compatibility.
-# Note: WhisperX may try to downgrade PyTorch to 2.8.0, so we reinstall if needed.
+# Upgrade pyannote.audio to 4.0.0+ for PyTorch 2.9.0 compatibility.
+# WhisperX dependencies downgrade PyTorch to 2.8.0; reinstall 2.9.0 if needed.
 # ==============================================================================
 echo -e "${YELLOW}[8/10] Finalizing package versions...${NC}"
 
@@ -277,10 +276,10 @@ echo "Upgrading pyannote.audio 3.x to 4.0.0+ for PyTorch 2.9.0 compatibility..."
 pip install --upgrade "pyannote.audio>=4.0.0"
 echo -e "${GREEN}✓ pyannote.audio upgraded${NC}"
 
-# Check if PyTorch was downgraded and reinstall if needed
+# Check if PyTorch version is 2.9.0 and reinstall if needed
 PYTORCH_VERSION=$(python3 -c "import torch; print(torch.__version__)" 2>/dev/null || echo "unknown")
 if [[ "$PYTORCH_VERSION" != "2.9.0"* ]]; then
-    echo "PyTorch was downgraded to $PYTORCH_VERSION - reinstalling 2.9.0..."
+    echo "PyTorch is $PYTORCH_VERSION - reinstalling 2.9.0..."
     if [ "$HAS_NVIDIA" = true ]; then
         pip install --force-reinstall torch==2.9.0 torchvision==0.24.0 torchaudio==2.9.0 --index-url https://download.pytorch.org/whl/cu128
     else
@@ -295,15 +294,13 @@ echo ""
 # ==============================================================================
 # Step 9: SpeechBrain Compatibility Patches
 # ==============================================================================
-# Patch SpeechBrain for compatibility with PyTorch nightly (torchaudio 2.1+).
-# Issue: torchaudio.list_audio_backends() was removed in newer versions but
-# SpeechBrain 1.0.3 still tries to call it, causing AttributeError.
-# Fix: Add hasattr() check before calling list_audio_backends().
-# This patch ensures SpeechBrain works with both old and new torchaudio versions.
+# Patch SpeechBrain for compatibility with torchaudio 2.9.0.
+# The list_audio_backends() function is not available in current torchaudio.
+# Add hasattr() check to handle both old and new torchaudio versions gracefully.
 # ==============================================================================
 echo -e "${YELLOW}[9/12] Applying SpeechBrain compatibility patches...${NC}"
-echo "Patching SpeechBrain for torchaudio 2.1+ compatibility"
-echo "Issue: list_audio_backends() removed in newer torchaudio versions"
+echo "Patching SpeechBrain for torchaudio 2.9.0 compatibility"
+echo "Adding compatibility check for list_audio_backends() function"
 
 SPEECHBRAIN_BACKEND="$VENV_DIR/lib/python3.12/site-packages/speechbrain/utils/torch_audio_backend.py"
 
@@ -339,7 +336,7 @@ original = """    elif torchaudio_major >= 2 and torchaudio_minor >= 1:
             )"""
 
 replacement = """    elif torchaudio_major >= 2 and torchaudio_minor >= 1:
-        # list_audio_backends() was removed in newer torchaudio versions
+        # list_audio_backends() is not available in torchaudio 2.9.0
         if hasattr(torchaudio, 'list_audio_backends'):
             available_backends = torchaudio.list_audio_backends()
             if len(available_backends) == 0:
@@ -382,10 +379,9 @@ echo ""
 # ==============================================================================
 # Step 10: LD_LIBRARY_PATH Configuration (NVIDIA Only)
 # ==============================================================================
-# PyTorch packages CUDA libraries as separate pip packages.
-# The system linker needs LD_LIBRARY_PATH to find these libraries at runtime.
-# Even with PyTorch 2.9.0 stable, this is required for cuDNN to load properly.
-# Added to ~/.bashrc for persistence across terminal sessions.
+# PyTorch packages CUDA libraries (including cuDNN) as separate pip packages.
+# The system linker needs LD_LIBRARY_PATH to locate these libraries at runtime.
+# This configuration is added to ~/.bashrc for persistence across sessions.
 # ==============================================================================
 if [ "$HAS_NVIDIA" = true ]; then
     echo -e "${YELLOW}[10/12] Configuring LD_LIBRARY_PATH for NVIDIA...${NC}"

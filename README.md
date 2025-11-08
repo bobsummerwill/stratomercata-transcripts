@@ -211,19 +211,14 @@ WhisperX (with patches)
 GPU-Accelerated Transcription
 ```
 
-### PyTorch Version History
+### PyTorch 2.9.0 Stable
 
-**Evolution of Blackwell Support:**
-- **Before PyTorch 2.7 (pre-April 2025)**: RTX 50-series required nightly builds
-- **PyTorch 2.7 (April 2025)**: Prototype Blackwell support introduced
-- **PyTorch 2.9.0 (October 2025)**: Mature stable Blackwell support
-- **Current setup**: Using stable PyTorch 2.9.0 for reliability
+This setup uses PyTorch 2.9.0 stable for the following reasons:
 
-**Why PyTorch 2.9.0 Stable:**
-- Full Blackwell (sm_120) architecture support
-- Stable, well-tested releases (vs experimental nightly builds)
-- Better compatibility with ecosystem packages
-- Production-ready for RTX 50-series GPUs
+- Full Blackwell (sm_120) architecture support for RTX 50-series GPUs
+- Stable, well-tested release suitable for production use
+- Excellent compatibility with ecosystem packages (pyannote.audio 4.0.1+, WhisperX)
+- Reliable performance on all NVIDIA GPU generations
 
 ### Why CUDA 12.8 (not 13.0)?
 
@@ -251,9 +246,9 @@ sed -i '412s/use_auth_token=None/token=None/' venv/lib/python3.12/site-packages/
 
 ### LD_LIBRARY_PATH Configuration
 
-**Still required with PyTorch 2.9.0 stable for cuDNN**
+**Required for cuDNN Library Loading**
 
-Even with PyTorch 2.9.0 stable, the system linker needs `LD_LIBRARY_PATH` to find cuDNN libraries at runtime. The installation script automatically configures this by adding to your `~/.bashrc`:
+The system linker needs `LD_LIBRARY_PATH` to locate cuDNN libraries at runtime. The installation script automatically configures this by adding to your `~/.bashrc`:
 
 ```bash
 # Automatically configured by install_packages_and_venv.sh
