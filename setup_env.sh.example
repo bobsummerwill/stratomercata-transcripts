@@ -1,16 +1,58 @@
 #!/bin/bash
-# Setup environment variables for WhisperX transcription pipeline
+# ==============================================================================
+# Environment Variables for WhisperX Transcription + AI Post-Processing
+# ==============================================================================
+# Copy this file to setup_env.sh and fill in your API keys
+# Only HF_TOKEN is required. AI provider keys are optional based on your usage.
 
-# Hugging Face API Token
+# ==============================================================================
+# REQUIRED: HuggingFace Token (for WhisperX diarization models)
+# ==============================================================================
 # Get your token from: https://huggingface.co/settings/tokens
 # Accept model agreements at:
 #   - https://huggingface.co/pyannote/speaker-diarization-3.1
 #   - https://huggingface.co/pyannote/segmentation-3.0
 export HF_TOKEN="your_huggingface_token_here"
 
+# ==============================================================================
+# OPTIONAL: AI Provider API Keys (for post-processing transcripts)
+# ==============================================================================
+# Only add the providers you plan to use. Ollama requires no API key (local).
+
+# OpenAI (ChatGPT-4o-latest, GPT-4o, etc.)
+# Get key from: https://platform.openai.com/api-keys
+export OPENAI_API_KEY="your_openai_api_key_here"
+
+# Anthropic (Claude Sonnet, Claude Opus, etc.)
+# Get key from: https://console.anthropic.com/
+export ANTHROPIC_API_KEY="your_anthropic_api_key_here"
+
+# Google (Gemini 2.0 Flash, Gemini Pro, etc.)
+# Get key from: https://makersuite.google.com/app/apikey
+export GOOGLE_API_KEY="your_google_api_key_here"
+
+# DeepSeek (Very cost-effective, good quality)
+# Get key from: https://platform.deepseek.com/
+export DEEPSEEK_API_KEY="your_deepseek_api_key_here"
+
+# Ollama - No API key needed (runs locally, FREE, private)
+# Just ensure service is running: ollama serve
+# Models available: qwen2.5:32b, llama3.1:70b, etc.
+
+# ==============================================================================
+# Display Configuration
+# ==============================================================================
 echo "✓ Environment variables set"
 echo "  HF_TOKEN: ${HF_TOKEN:0:20}..."
+[ -n "$OPENAI_API_KEY" ] && echo "  OPENAI_API_KEY: ${OPENAI_API_KEY:0:20}..."
+[ -n "$ANTHROPIC_API_KEY" ] && echo "  ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:0:20}..."
+[ -n "$GOOGLE_API_KEY" ] && echo "  GOOGLE_API_KEY: ${GOOGLE_API_KEY:0:20}..."
+[ -n "$DEEPSEEK_API_KEY" ] && echo "  DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:0:20}..."
 echo ""
 echo "You can now run the transcription pipeline:"
 echo "  source venv/bin/activate"
-echo "  python3 diarize_and_combine.py audio.mp3 transcript.txt"
+echo "  python3 scripts/transcribe_with_diarization.py audio.mp3 --high-quality"
+echo ""
+echo "Or complete pipeline with AI correction:"
+echo "  ./scripts/transcribe_and_correct.sh audio.mp3 --provider openai"
+echo "  ./scripts/process_downloads.sh  # Batch process all MP3s"
