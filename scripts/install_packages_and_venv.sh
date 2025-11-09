@@ -133,8 +133,12 @@ echo "  - python3-dev: Python headers for compiling extensions"
 echo "  - python3-venv: Python virtual environment support"
 echo "  - python3-pip: Python package installer"
 echo "  - git: Version control for installing packages from GitHub"
+echo "  - curl: HTTP client for API requests"
+echo "  - ca-certificates: SSL/TLS certificates for secure connections"
+echo "  - libssl-dev: SSL development libraries"
+echo "  - libcurl4-openssl-dev: cURL development libraries for Python packages"
 sudo apt update
-sudo apt install -y build-essential ffmpeg python3-dev python3-venv python3-pip git
+sudo apt install -y build-essential ffmpeg python3-dev python3-venv python3-pip git curl ca-certificates libssl-dev libcurl4-openssl-dev
 echo -e "${GREEN}✓ System dependencies installed${NC}"
 echo ""
 
@@ -277,10 +281,12 @@ echo ""
 # Installs pyannote.audio 4.0+, which provides PyTorch 2.9.0 compatibility.
 # Version 4.0+ is required to work with PyTorch 2.9.0's API and features.
 # ==============================================================================
-echo -e "${YELLOW}[8/13] Installing pyannote.audio 4.0+...${NC}"
+echo -e "${YELLOW}[8/13] Installing pyannote.audio 4.0+ and AI providers...${NC}"
 echo "Installing pyannote.audio 4.0+ for PyTorch 2.9.0 compatibility..."
 pip install --upgrade "pyannote.audio>=4.0.0"
-echo -e "${GREEN}✓ pyannote.audio 4.0+ installed${NC}"
+echo "Installing AI provider packages for post-processing..."
+pip install openai anthropic google-generativeai requests
+echo -e "${GREEN}✓ pyannote.audio 4.0+ and AI providers installed${NC}"
 echo ""
 
 # ==============================================================================
