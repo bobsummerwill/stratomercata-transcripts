@@ -160,31 +160,6 @@ outputs/
 
 Naming: `{audio}_{transcriber}_{processor}_corrected.{txt|md}`
 
-## Advanced Options
-
-### WhisperX Batch Size
-
-```bash
-# Reduce for lower VRAM (default: 16 GPU, 8 CPU)
-./scripts/process_single.sh audio.mp3 \
-  --transcribers whisperx \
-  --processors openai \
-  --batch-size 8
-```
-
-### Direct Script Usage
-
-```bash
-# Transcription only (all transcribers)
-python3 scripts/process_single_transcribe_and_diarize.py audio.mp3 \
-  --transcribers whisperx,deepgram
-
-# Post-processing only (all processors)
-python3 scripts/process_single_post_process.py \
-  intermediates/audio_whisperx_transcript_with_speakers.txt \
-  --processors anthropic,openai,ollama
-```
-
 ## GPU Support
 
 ### NVIDIA GPUs
@@ -197,37 +172,6 @@ Setup installs appropriate PyTorch version automatically.
 
 ### AMD GPUs
 Not supported for GPU acceleration. Systems with AMD GPUs run in CPU-only mode.
-
-## Troubleshooting
-
-### WhisperX fails with "HF_TOKEN not set"
-```bash
-# Add to setup_env.sh
-export HF_TOKEN="hf_..."
-
-# Accept terms at:
-# https://huggingface.co/pyannote/speaker-diarization-3.1
-# https://huggingface.co/pyannote/segmentation-3.0
-```
-
-### CUDA out of memory
-```bash
-# Reduce batch size
-./scripts/process_single.sh audio.mp3 \
-  --transcribers whisperx \
-  --processors openai \
-  --batch-size 4
-```
-
-### Cloud API fails
-```bash
-# Check API key is set
-echo $DEEPGRAM_API_KEY
-echo $ANTHROPIC_API_KEY
-
-# Source environment
-source setup_env.sh
-```
 
 ## Project Structure
 
@@ -248,14 +192,6 @@ stratomercata-transcripts/
 └── outputs/                                     # Phase 2 outputs
 ```
 
-## Tips
-
-1. **Start small** - Test first 5 minutes before processing full audio
-2. **Keep intermediates** - Save transcripts to re-run post-processing without re-transcribing
-3. **Try multiple** - Different transcribers/processors excel at different content
-4. **Use local when possible** - WhisperX + Ollama = completely free & private
-5. **Cloud for speed** - Deepgram transcribes 1 hour in 23 seconds
-
 ## Resources
 
 - [WhisperX](https://github.com/m-bain/whisperX) - GPU-accelerated Whisper with diarization
@@ -268,11 +204,9 @@ stratomercata-transcripts/
 
 Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
 
-Dependencies: WhisperX (MIT), PyTorch (BSD), pyannote.audio (MIT)
-
----
-
-**Last Updated:** January 2025  
-**Tested:** RTX 5070, RTX 3090, CPU-only  
-**Python:** 3.8 - 3.12  
-**OS:** Ubuntu 20.04+, Windows 11 (WSL2)
+**Dependencies:**
+- **Core ML**: WhisperX (MIT), PyTorch (BSD-3-Clause), pyannote.audio (MIT)
+- **Transcription**: faster-whisper (MIT), deepgram-sdk (MIT), assemblyai (MIT), openai (Apache-2.0)
+- **AI Processing**: anthropic (MIT), google-generativeai (Apache-2.0), requests (Apache-2.0)
+- **Audio**: ffmpeg (LGPL/GPL), torchaudio (BSD-3-Clause), pandas (BSD-3-Clause)
+- **Model Hosting**: speechbrain (Apache-2.0), transformers (Apache-2.0), numpy (BSD-3-Clause)

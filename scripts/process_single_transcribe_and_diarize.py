@@ -41,7 +41,6 @@ def main():
         help="Comma-separated list of transcription services (whisperx,deepgram,assemblyai,openai)"
     )
     parser.add_argument("--output-dir", default="intermediates", help="Output directory")
-    parser.add_argument("--batch-size", type=int, help="Batch size for WhisperX")
     parser.add_argument("--force-cpu", action="store_true", help="Force CPU for WhisperX")
     
     args = parser.parse_args()
@@ -113,7 +112,6 @@ def main():
                 output_path = transcribe_whisperx(
                     str(audio_path),
                     args.output_dir,
-                    args.batch_size,
                     args.force_cpu
                 )
             elif transcriber == 'deepgram':
@@ -166,7 +164,7 @@ def main():
         sys.exit(1)
 
 
-def transcribe_whisperx(audio_path, output_dir, batch_size=None, force_cpu=False):
+def transcribe_whisperx(audio_path, output_dir, force_cpu=False):
     """WhisperX local transcription with speaker diarization"""
     import time
     import subprocess
@@ -201,9 +199,7 @@ def transcribe_whisperx(audio_path, output_dir, batch_size=None, force_cpu=False
     
     model_name = "large-v3"
     compute_type = "float16" if device == "cuda" else "int8"
-    
-    if batch_size is None:
-        batch_size = 16 if device == "cuda" else 8
+    batch_size = 16 if device == "cuda" else 8
     
     print(f"  Device: {device}")
     print(f"  Model: {model_name}")
