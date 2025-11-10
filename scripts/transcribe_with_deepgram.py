@@ -11,6 +11,9 @@ from pathlib import Path
 import argparse
 import time
 
+# Import reformatter to match WhisperX output format
+from reformat_deepgram_transcript import reformat_transcript
+
 def transcribe_with_deepgram(audio_path, output_dir="intermediates"):
     """
     Transcribe audio using Deepgram with speaker diarization
@@ -159,6 +162,11 @@ def transcribe_with_deepgram(audio_path, output_dir="intermediates"):
         
         print(f"Saved transcript: {output_path}")
         print(f"Saved markdown: {md_path}")
+        
+        # Reformat to match WhisperX style (group consecutive speaker turns)
+        print("Reformatting to group consecutive speaker turns...")
+        reformat_transcript(output_path)
+        print(f"✓ Reformatted: {output_path}")
         print()
         
         # Stats
