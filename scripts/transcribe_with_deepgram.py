@@ -7,12 +7,40 @@ Most cost-effective cloud option: ~$0.0043/minute
 
 import os
 import sys
+import re
 from pathlib import Path
 import argparse
 import time
 
-# Import reformatter to match WhisperX output format
-from reformat_deepgram_transcript import reformat_transcript
+def reformat_to_whisperx_style(lines_list):
+    """
+    Reformat Deepgram inline speaker format to WhisperX grouped format
+    
+    Input format:  [150.8s] SPEAKER_00: What's going on
+    Output format: SPEAKER_00:
+                   [150.8s] What's going on
+    """
+    current_speaker = None
+    output_lines = []
+    
+    for line in lines_list:
+        # Match pattern: [timestamp] SPEAKER_XX: text
+        match = re.match(r'\[(\d+\.\d+)s\]\s+(SPEAKER_\d+):\s*(.+)', line)
+        
+        if match:
+            timestamp, speaker, text = match.groups()
+            
+            # New speaker - add header
+            if speaker != current_speaker:
+                if output_lines:  # Add blank line before new speaker (except first)
+                    output_lines.append('')
+                output_lines.append(f'{speaker}:')
+                current_speaker = speaker
+            
+            # Add timestamped text
+            output_lines.append(f'[{timestamp}s] {text}')
+    
+    return output_lines
 
 def transcribe_with_deepgram(audio_path, output_dir="intermediates"):
     """
@@ -160,13 +188,18 @@ def transcribe_with_deepgram(audio_path, output_dir="intermediates"):
         with open(md_path, 'w', encoding='utf-8') as f:
             f.write(md_content)
         
-        print(f"Saved transcript: {output_path}")
-        print(f"Saved markdown: {md_path}")
-        
         # Reformat to match WhisperX style (group consecutive speaker turns)
         print("Reformatting to group consecutive speaker turns...")
-        reformat_transcript(output_path)
-        print(f"✓ Reformatted: {output_path}")
+        reformatted_lines = reformat_to_whisperx_style(formatted_lines)
+        reformatted = '\n'.join(reformatted_lines) + '\n'
+        
+        # Overwrite with reformatted version
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(reformatted)
+        
+        print(f"Saved transcript: {output_path}")
+        print(f"Saved markdown: {md_path}")
+        print(f"✓ Reformatted to WhisperX style")
         print()
         
         # Stats
