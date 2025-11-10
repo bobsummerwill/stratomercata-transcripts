@@ -416,6 +416,9 @@ def transcribe_deepgram(audio_path, output_dir):
     
     # Model: nova-3-general (updated 2025-11-10)
     # Best accuracy for multi-speaker conversations and technical content
+    # utterances=True: Returns transcript organized by speaker turns (continuous speech segments)
+    #                  Each utterance = one speaker's uninterrupted speech with timestamps
+    #                  This is how we get clean speaker separation
     response = deepgram.listen.v1.media.transcribe_file(
         request=buffer_data,
         model="nova-3-general",
@@ -423,7 +426,15 @@ def transcribe_deepgram(audio_path, output_dir):
         diarize=True,
         punctuate=True,
         paragraphs=True,
-        utterances=True,
+        utterances=True,  # Returns speaker turns (see comment above)
+        filler_words=True,  # Detect filler words (um, uh, ah, etc.)
+        keywords=[
+            # Blockchain/Crypto terms for improved accuracy
+            "Ethereum", "Bitcoin", "blockchain", "cryptocurrency", "smart contract",
+            "DeFi", "NFT", "token", "wallet", "consensus", "proof of stake",
+            "proof of work", "mining", "validator", "gas", "gwei", "wei",
+            "Solidity", "EVM", "dApp", "Web3", "MetaMask", "staking"
+        ],
     )
     
     elapsed = time.time() - start_time
