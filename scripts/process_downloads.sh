@@ -9,8 +9,8 @@
 
 set -e
 
-# Default providers (deepseek, gemini, claude, ollama, openai)
-DEFAULT_PROVIDERS="deepseek,gemini,anthropic,ollama,openai"
+# Default providers (all 6 providers in recommended order)
+DEFAULT_PROVIDERS="anthropic,openai,gemini,deepseek,moonshot,ollama"
 
 # Parse arguments
 PROVIDERS="$DEFAULT_PROVIDERS"

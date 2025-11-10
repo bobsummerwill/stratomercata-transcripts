@@ -10,6 +10,7 @@ This guide explains the different AI providers available for transcript post-pro
 | **Claude 3.5** (Anthropic) | Cloud | $$$ | Excellent | Fast | Low |
 | **Gemini 2.0** (Google) | Cloud | $$ | Excellent | Fast | Low |
 | **DeepSeek** | Cloud | $ | Very Good | Fast | Low |
+| **Moonshot Kimi** | Cloud | $$ | Very Good | Fast | Low |
 | **Local LLM** (Ollama) | Local | FREE | Good-Excellent | Medium | Complete |
 
 ## Cloud Providers (API Required)
@@ -57,7 +58,7 @@ This guide explains the different AI providers available for transcript post-pro
 **Best for: Cost-effectiveness, technical content**
 
 - **Models**: `deepseek-chat`
-- **Cost**: ~$0.14 per 1M input tokens (CHEAPEST!)
+- **Cost**: ~$0.14 per 1M input tokens (VERY CHEAP!)
 - **Quality**: Very good, surprisingly competitive with GPT-4
 - **Setup**:
   ```bash
@@ -65,11 +66,25 @@ This guide explains the different AI providers available for transcript post-pro
   python3 post_process_transcript.py transcript.txt --provider deepseek
   ```
 - **Get API key**: https://platform.deepseek.com/
-- **Note**: Requires adding DeepSeek support to script (see below)
+
+### 5. Moonshot Kimi (Chinese Provider)
+**Best for: Large context windows, competitive pricing**
+
+- **Models**: `moonshot-v1-128k` (128K context window)
+- **Cost**: ~$0.50-1.00 per 1M input tokens (affordable)
+- **Quality**: Very good, excellent for technical content
+- **Context**: 128K context window (larger than most)
+- **Setup**:
+  ```bash
+  export MOONSHOT_API_KEY="sk-..."
+  python3 post_process_transcript.py transcript.txt --provider moonshot
+  ```
+- **Get API key**: https://platform.moonshot.cn/
+- **Note**: Chinese provider, uses OpenAI-compatible API
 
 ## Local Options (FREE, Private)
 
-### 5. Ollama (Local LLM)
+### 6. Ollama (Local LLM)
 **Best for: Privacy, unlimited usage, no API costs**
 
 **Recommended Models:**
@@ -138,6 +153,7 @@ For a typical 1-hour interview transcript (~50,000 tokens):
 | Claude 3.5 | ~$0.15 |
 | Gemini 2.0 Flash | ~$0.004 |
 | DeepSeek | ~$0.007 |
+| Moonshot | ~$0.05 |
 | **Ollama (Local)** | **$0.00** |
 
 For 100 transcripts:
@@ -145,6 +161,7 @@ For 100 transcripts:
 - Claude: $15
 - Gemini: $0.40
 - DeepSeek: $0.70
+- Moonshot: $5.00
 - **Ollama: $0**
 
 ## Installation Requirements
@@ -161,6 +178,9 @@ pip install anthropic
 pip install google-generativeai
 
 # DeepSeek (uses OpenAI-compatible API)
+pip install openai
+
+# Moonshot (uses OpenAI-compatible API)
 pip install openai
 ```
 

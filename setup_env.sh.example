@@ -21,23 +21,23 @@ export HF_TOKEN="your_huggingface_token_here"
 
 # OpenAI (ChatGPT-4o-latest, GPT-4o, etc.)
 # Get key from: https://platform.openai.com/api-keys
-export OPENAI_API_KEY="your_openai_api_key_here"
+export OPENAI_API_KEY=""
 
 # Anthropic (Claude Sonnet, Claude Opus, etc.)
 # Get key from: https://console.anthropic.com/
-export ANTHROPIC_API_KEY="your_anthropic_api_key_here"
+export ANTHROPIC_API_KEY=""
 
 # Google (Gemini 2.0 Flash, Gemini Pro, etc.)
 # Get key from: https://makersuite.google.com/app/apikey
-export GOOGLE_API_KEY="your_google_api_key_here"
+export GOOGLE_API_KEY=""
 
 # DeepSeek (Very cost-effective, good quality)
 # Get key from: https://platform.deepseek.com/
-export DEEPSEEK_API_KEY="your_deepseek_api_key_here"
+export DEEPSEEK_API_KEY=""
 
 # Moonshot Kimi (Chinese provider, 128K context)
 # Get key from: https://platform.moonshot.cn/
-export MOONSHOT_API_KEY="your_moonshot_api_key_here"
+export MOONSHOT_API_KEY=""
 
 # Ollama - No API key needed (runs locally, FREE, private)
 # Just ensure service is running: ollama serve
@@ -47,37 +47,37 @@ export MOONSHOT_API_KEY="your_moonshot_api_key_here"
 # Display Configuration
 # ==============================================================================
 echo "Environment variables set"
-if [ -n "$HF_TOKEN" ] && [ "$HF_TOKEN" != "your_huggingface_token_here" ]; then
+if [ -n "$HF_TOKEN" ] && [ "$HF_TOKEN" != "" ]; then
   echo "  HF_TOKEN: SET"
 else
   echo "  HF_TOKEN: NOT SET"
 fi
 
-if [ -n "$OPENAI_API_KEY" ] && [ "$OPENAI_API_KEY" != "your_openai_api_key_here" ]; then
+if [ -n "$OPENAI_API_KEY" ] && [ "$OPENAI_API_KEY" != "" ]; then
   echo "  OPENAI_API_KEY: SET"
 else
   echo "  OPENAI_API_KEY: NOT SET"
 fi
 
-if [ -n "$ANTHROPIC_API_KEY" ] && [ "$ANTHROPIC_API_KEY" != "your_anthropic_api_key_here" ]; then
+if [ -n "$ANTHROPIC_API_KEY" ] && [ "$ANTHROPIC_API_KEY" != "" ]; then
   echo "  ANTHROPIC_API_KEY: SET"
 else
   echo "  ANTHROPIC_API_KEY: NOT SET"
 fi
 
-if [ -n "$GOOGLE_API_KEY" ] && [ "$GOOGLE_API_KEY" != "your_google_api_key_here" ]; then
+if [ -n "$GOOGLE_API_KEY" ] && [ "$GOOGLE_API_KEY" != "" ]; then
   echo "  GOOGLE_API_KEY: SET"
 else
   echo "  GOOGLE_API_KEY: NOT SET"
 fi
 
-if [ -n "$DEEPSEEK_API_KEY" ] && [ "$DEEPSEEK_API_KEY" != "your_deepseek_api_key_here" ]; then
+if [ -n "$DEEPSEEK_API_KEY" ] && [ "$DEEPSEEK_API_KEY" != "" ]; then
   echo "  DEEPSEEK_API_KEY: SET"
 else
   echo "  DEEPSEEK_API_KEY: NOT SET"
 fi
 
-if [ -n "$MOONSHOT_API_KEY" ] && [ "$MOONSHOT_API_KEY" != "your_moonshot_api_key_here" ]; then
+if [ -n "$MOONSHOT_API_KEY" ] && [ "$MOONSHOT_API_KEY" != "" ]; then
   echo "  MOONSHOT_API_KEY: SET"
 else
   echo "  MOONSHOT_API_KEY: NOT SET"

@@ -57,11 +57,11 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Validate providers parameter
+# Set default providers if not specified
 if [ -z "$PROVIDERS" ]; then
-    echo "Error: --providers parameter is required"
-    echo "Example: $0 $AUDIO_FILE --providers openai,gemini"
-    exit 1
+    PROVIDERS="anthropic,openai,gemini,deepseek,moonshot,ollama"
+    echo "No providers specified, using all: $PROVIDERS"
+    echo ""
 fi
 
 # Convert comma-separated list to array
