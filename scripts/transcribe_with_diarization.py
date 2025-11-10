@@ -266,10 +266,10 @@ Processing options:
     if args.output:
         output_path = Path(args.output)
     else:
-        # Build filename without model indicator (always using large-v3)
+        # Build filename with whisperx indicator for consistency with other transcribers
         intermediates_dir = Path("intermediates")
         intermediates_dir.mkdir(exist_ok=True)
-        output_path = intermediates_dir / f"{audio_path.stem}_transcript_with_speakers.txt"
+        output_path = intermediates_dir / f"{audio_path.stem}_whisperx_transcript_with_speakers.txt"
     
     # Setup device based on flags
     if args.force_cpu:
