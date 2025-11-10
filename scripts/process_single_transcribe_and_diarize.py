@@ -33,6 +33,23 @@ def skip(msg):
 # Utility Functions
 # ============================================================================
 
+def validate_api_key(env_var):
+    """
+    Check if API key environment variable is set.
+    
+    Args:
+        env_var: Name of environment variable to check
+    
+    Returns:
+        Tuple of (key, error_message). If key exists, error_message is None.
+        If key missing, key is None and error_message describes the issue.
+    """
+    key = os.environ.get(env_var, '').strip()
+    if not key:
+        return None, f"{env_var} not set"
+    return key, None
+
+
 def save_transcript_files(output_dir, basename, service_name, segments, speaker_key="speaker"):
     """
     Save transcript in both txt and md formats with consistent naming.
@@ -164,24 +181,16 @@ def main():
         
         transcriber_start = time.time()
         
-        # Check API keys
+        # Check API keys using utility
         skip_reason = None
         if transcriber == 'deepgram':
-            api_key = os.environ.get('DEEPGRAM_API_KEY', '').strip()
-            if not api_key:
-                skip_reason = "DEEPGRAM_API_KEY not set"
+            _, skip_reason = validate_api_key('DEEPGRAM_API_KEY')
         elif transcriber == 'assemblyai':
-            api_key = os.environ.get('ASSEMBLYAI_API_KEY', '').strip()
-            if not api_key:
-                skip_reason = "ASSEMBLYAI_API_KEY not set"
+            _, skip_reason = validate_api_key('ASSEMBLYAI_API_KEY')
         elif transcriber == 'openai':
-            api_key = os.environ.get('OPENAI_API_KEY', '').strip()
-            if not api_key:
-                skip_reason = "OPENAI_API_KEY not set"
+            _, skip_reason = validate_api_key('OPENAI_API_KEY')
         elif transcriber == 'whisperx':
-            hf_token = os.environ.get('HF_TOKEN', '').strip()
-            if not hf_token:
-                skip_reason = "HF_TOKEN not set"
+            _, skip_reason = validate_api_key('HF_TOKEN')
         
         if skip_reason:
             print(skip(f"{transcriber}: {skip_reason}"))

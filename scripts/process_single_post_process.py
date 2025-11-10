@@ -35,6 +35,23 @@ def skip(msg):
 # Utility Functions
 # ============================================================================
 
+def validate_api_key(env_var):
+    """
+    Check if API key environment variable is set.
+    
+    Args:
+        env_var: Name of environment variable to check
+    
+    Returns:
+        Tuple of (key, error_message). If key exists, error_message is None.
+        If key missing, key is None and error_message describes the issue.
+    """
+    key = os.environ.get(env_var, '').strip()
+    if not key:
+        return None, f"{env_var} not set"
+    return key, None
+
+
 def extract_transcriber_from_filename(filepath):
     """
     Extract transcriber name from intermediate filename.
@@ -499,46 +516,32 @@ def main():
             print(f"Valid options: {', '.join(sorted(valid_processors))}")
             sys.exit(1)
     
-    # Check API keys
+    # Check API keys using utility
     api_keys = {}
     skip_processors = []
     
+    # Map processor names to their environment variable names
+    key_mapping = {
+        'anthropic': 'ANTHROPIC_API_KEY',
+        'openai': 'OPENAI_API_KEY',
+        'gemini': 'GOOGLE_API_KEY',
+        'deepseek': 'DEEPSEEK_API_KEY',
+        'moonshot': 'MOONSHOT_API_KEY'
+    }
+    
     for proc in processors:
-        if proc == "anthropic":
-            key = os.environ.get('ANTHROPIC_API_KEY')
-            if not key:
-                print(f"⊘ Skipping {proc}: ANTHROPIC_API_KEY not set")
+        if proc == 'ollama':
+            # Ollama doesn't need an API key
+            continue
+        
+        env_var = key_mapping.get(proc)
+        if env_var:
+            key, error = validate_api_key(env_var)
+            if error:
+                print(f"⊘ Skipping {proc}: {error}")
                 skip_processors.append(proc)
             else:
-                api_keys['anthropic'] = key
-        elif proc == "openai":
-            key = os.environ.get('OPENAI_API_KEY')
-            if not key:
-                print(f"⊘ Skipping {proc}: OPENAI_API_KEY not set")
-                skip_processors.append(proc)
-            else:
-                api_keys['openai'] = key
-        elif proc == "gemini":
-            key = os.environ.get('GOOGLE_API_KEY')
-            if not key:
-                print(f"⊘ Skipping {proc}: GOOGLE_API_KEY not set")
-                skip_processors.append(proc)
-            else:
-                api_keys['gemini'] = key
-        elif proc == "deepseek":
-            key = os.environ.get('DEEPSEEK_API_KEY')
-            if not key:
-                print(f"⊘ Skipping {proc}: DEEPSEEK_API_KEY not set")
-                skip_processors.append(proc)
-            else:
-                api_keys['deepseek'] = key
-        elif proc == "moonshot":
-            key = os.environ.get('MOONSHOT_API_KEY')
-            if not key:
-                print(f"⊘ Skipping {proc}: MOONSHOT_API_KEY not set")
-                skip_processors.append(proc)
-            else:
-                api_keys['moonshot'] = key
+                api_keys[proc] = key
     
     # Remove skipped processors
     processors = [p for p in processors if p not in skip_processors]
