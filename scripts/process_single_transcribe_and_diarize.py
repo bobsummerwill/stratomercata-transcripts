@@ -7,7 +7,26 @@ Supports multiple providers: WhisperX (local), Deepgram, AssemblyAI, OpenAI
 import sys
 import os
 import argparse
+import time
 from pathlib import Path
+
+# ANSI color codes
+class Colors:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    RESET = '\033[0m'
+    BOLD = '\033[1m'
+
+def success(msg):
+    return f"{Colors.GREEN}✓{Colors.RESET} {msg}"
+
+def failure(msg):
+    return f"{Colors.RED}✗{Colors.RESET} {msg}"
+
+def skip(msg):
+    return f"{Colors.YELLOW}⊘{Colors.RESET} {msg}"
 
 def main():
     parser = argparse.ArgumentParser(
@@ -53,10 +72,41 @@ def main():
     print()
     
     # Process each transcriber
+    pipeline_start = time.time()
     results = []
+    skipped = 0
+    
     for i, transcriber in enumerate(transcribers, 1):
         print(f"[{i}/{len(transcribers)}] Transcribing with {transcriber}...")
         print("-" * 70)
+        
+        transcriber_start = time.time()
+        
+        # Check API keys
+        skip_reason = None
+        if transcriber == 'deepgram':
+            api_key = os.environ.get('DEEPGRAM_API_KEY', '').strip()
+            if not api_key:
+                skip_reason = "DEEPGRAM_API_KEY not set"
+        elif transcriber == 'assemblyai':
+            api_key = os.environ.get('ASSEMBLYAI_API_KEY', '').strip()
+            if not api_key:
+                skip_reason = "ASSEMBLYAI_API_KEY not set"
+        elif transcriber == 'openai':
+            api_key = os.environ.get('OPENAI_API_KEY', '').strip()
+            if not api_key:
+                skip_reason = "OPENAI_API_KEY not set"
+        elif transcriber == 'whisperx':
+            hf_token = os.environ.get('HF_TOKEN', '').strip()
+            if not hf_token:
+                skip_reason = "HF_TOKEN not set"
+        
+        if skip_reason:
+            print(skip(f"{transcriber}: {skip_reason}"))
+            results.append((transcriber, None, 'skipped'))
+            skipped += 1
+            print()
+            continue
         
         try:
             if transcriber == 'whisperx':
@@ -73,36 +123,46 @@ def main():
             elif transcriber == 'openai':
                 output_path = transcribe_openai(str(audio_path), args.output_dir)
             
-            results.append((transcriber, output_path, True))
-            print(f"✓ {transcriber} complete: {output_path}")
+            elapsed = time.time() - transcriber_start
+            results.append((transcriber, output_path, 'success', elapsed))
+            print(success(f"{transcriber} complete ({elapsed:.1f}s): {output_path}"))
             
         except Exception as e:
-            print(f"✗ {transcriber} failed: {e}")
-            results.append((transcriber, None, False))
+            elapsed = time.time() - transcriber_start
+            print(failure(f"{transcriber} failed ({elapsed:.1f}s): {e}"))
+            results.append((transcriber, None, 'failed', elapsed))
         
         print()
     
     # Summary
+    pipeline_elapsed = time.time() - pipeline_start
+    
     print("="*70)
     print("Transcription Summary")
     print("="*70)
-    successful = sum(1 for _, _, success in results if success)
-    failed = sum(1 for _, _, success in results if not success)
+    successful = sum(1 for r in results if len(r) > 2 and r[2] == 'success')
+    failed = sum(1 for r in results if len(r) > 2 and r[2] == 'failed')
     
     print(f"Total: {len(results)}")
-    print(f"Successful: {successful}")
-    print(f"Failed: {failed}")
+    print(success(f"Successful: {successful}") if successful > 0 else f"Successful: 0")
+    if failed > 0:
+        print(failure(f"Failed: {failed}"))
+    if skipped > 0:
+        print(skip(f"Skipped: {skipped}"))
+    print(f"Total time: {pipeline_elapsed:.1f}s ({pipeline_elapsed/60:.1f}min)")
     print()
     
     if successful > 0:
         print("Output files:")
-        for transcriber, path, success in results:
-            if success:
-                print(f"  {transcriber}: {path}")
+        for result in results:
+            if len(result) >= 3 and result[2] == 'success':
+                transcriber, path = result[0], result[1]
+                elapsed = result[3] if len(result) > 3 else 0
+                print(f"  {transcriber}: {path} ({elapsed:.1f}s)")
     
     # Exit with error if all failed
     if successful == 0:
-        print("\nError: All transcriptions failed")
+        print(failure("\nError: All transcriptions failed"))
         sys.exit(1)
 
 
