@@ -223,17 +223,58 @@ def process_with_deepseek(transcript, api_key, context, model="deepseek-chat"):
     
     return response.choices[0].message.content
 
-def process_with_ollama(transcript, context, model="qwen2.5:32b"):
-    """Process transcript using local Ollama"""
+def process_with_ollama(transcript, context):
+    """Process transcript using local Ollama with qwen2.5:32b (auto-managed service)"""
+    import subprocess
+    import time
+    import signal
+    
     try:
         import requests
     except ImportError:
         print("Error: requests package not installed. Install with: pip install requests")
         return None
     
-    prompt = build_prompt(context, transcript)
+    # Hardcoded best model for technical content
+    model = "qwen2.5:32b"
+    ollama_process = None
     
     try:
+        # Check if Ollama is already running
+        print("   Checking Ollama service...")
+        try:
+            response = requests.get("http://localhost:11434/api/tags", timeout=2)
+            ollama_was_running = response.status_code == 200
+            if ollama_was_running:
+                print("   ✓ Ollama already running")
+        except requests.exceptions.ConnectionError:
+            ollama_was_running = False
+            print("   Starting Ollama service...")
+            # Start Ollama serve in background
+            ollama_process = subprocess.Popen(
+                ['ollama', 'serve'],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
+            # Wait for service to be ready
+            for i in range(10):
+                time.sleep(1)
+                try:
+                    requests.get("http://localhost:11434/api/tags", timeout=1)
+                    print("   ✓ Ollama service started")
+                    break
+                except:
+                    continue
+            else:
+                print("   Error: Ollama service failed to start")
+                if ollama_process:
+                    ollama_process.terminate()
+                return None
+        
+        # Process transcript
+        prompt = build_prompt(context, transcript)
+        print(f"   Processing with {model}...")
+        
         response = requests.post(
             "http://localhost:11434/api/generate",
             json={
@@ -248,24 +289,32 @@ def process_with_ollama(transcript, context, model="qwen2.5:32b"):
             timeout=600
         )
         response.raise_for_status()
-        return response.json()["response"]
-    except requests.exceptions.ConnectionError:
-        print("Error: Could not connect to Ollama. Make sure it's running:")
-        print("  1. Start Ollama: ollama serve")
-        print("  2. Or install it: curl -fsSL https://ollama.com/install.sh | sh")
-        return None
+        result = response.json()["response"]
+        
+        return result
+        
     except requests.exceptions.Timeout:
-        print("Error: Ollama request timed out. Try a smaller model or increase timeout.")
+        print("   Error: Ollama request timed out")
         return None
     except Exception as e:
-        print(f"Error calling Ollama: {e}")
+        print(f"   Error: {e}")
         return None
+    finally:
+        # Stop Ollama if we started it
+        if not ollama_was_running and ollama_process:
+            print("   Stopping Ollama service...")
+            ollama_process.terminate()
+            try:
+                ollama_process.wait(timeout=5)
+                print("   ✓ Ollama service stopped")
+            except subprocess.TimeoutExpired:
+                ollama_process.kill()
+                print("   ✓ Ollama service force stopped")
 
 def process_transcript(transcript_path, api_key, provider="anthropic", 
                       openai_model="chatgpt-4o-latest", 
                       gemini_model="gemini-2.0-flash-exp",
-                      deepseek_model="deepseek-chat",
-                      ollama_model="qwen2.5:32b"):
+                      deepseek_model="deepseek-chat"):
     """Main processing function"""
     
     print("="*60)
@@ -281,7 +330,7 @@ def process_transcript(transcript_path, api_key, provider="anthropic",
     elif provider == "deepseek":
         print(f"Model: {deepseek_model}")
     elif provider == "ollama":
-        print(f"Model: {ollama_model}")
+        print(f"Model: qwen2.5:32b (hardcoded)")
     
     # Load transcript
     print("\n1. Loading transcript...")
@@ -312,7 +361,7 @@ def process_transcript(transcript_path, api_key, provider="anthropic",
     elif provider == "deepseek":
         corrected = process_with_deepseek(transcript, api_key, context, deepseek_model)
     elif provider == "ollama":
-        corrected = process_with_ollama(transcript, context, ollama_model)
+        corrected = process_with_ollama(transcript, context)
     else:
         print(f"Error: Unknown provider: {provider}")
         return None
@@ -405,8 +454,8 @@ Examples:
   # Using DeepSeek (very cost-effective)
   python3 post_process_transcript.py transcript.txt --provider deepseek
   
-  # Using Ollama (local, FREE, private)
-  python3 post_process_transcript.py transcript.txt --provider ollama --ollama-model qwen2.5:32b
+  # Using Ollama (local, FREE, private - auto-managed)
+  python3 post_process_transcript.py transcript.txt --provider ollama
   
   # With environment variables
   export OPENAI_API_KEY=sk-...
@@ -433,9 +482,6 @@ Examples:
                        default="deepseek-chat",
                        choices=["deepseek-chat", "deepseek-reasoner"],
                        help="DeepSeek model (default: deepseek-chat)")
-    parser.add_argument("--ollama-model",
-                       default="qwen2.5:32b",
-                       help="Ollama model (default: qwen2.5:32b)")
     
     args = parser.parse_args()
     
@@ -475,7 +521,7 @@ Examples:
     result = process_transcript(
         args.transcript, api_key, args.provider,
         args.openai_model, args.gemini_model,
-        args.deepseek_model, args.ollama_model
+        args.deepseek_model
     )
     
     sys.exit(0 if result else 1)

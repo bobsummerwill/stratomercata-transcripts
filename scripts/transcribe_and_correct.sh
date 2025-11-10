@@ -14,7 +14,6 @@ if [ $# -eq 0 ]; then
     echo "  --openai-model <name> OpenAI model (chatgpt-4o-latest, gpt-4o, etc.)"
     echo "  --gemini-model <name> Gemini model (gemini-2.0-flash-exp, etc.)"
     echo "  --deepseek-model <name> DeepSeek model (deepseek-chat, etc.)"
-    echo "  --ollama-model <name> Ollama model (qwen2.5:32b, llama3.1:70b, etc.)"
     echo "  --skip-correction    Skip AI post-processing step"
     echo ""
     echo "Environment variables:"
@@ -29,8 +28,8 @@ if [ $# -eq 0 ]; then
     echo "  # Using ChatGPT-5 (latest OpenAI model)"
     echo "  $0 interview.mp3 --provider openai"
     echo ""
-    echo "  # Using Ollama (local, FREE, private)"
-    echo "  $0 interview.mp3 --provider ollama --ollama-model qwen2.5:32b"
+    echo "  # Using Ollama (local, FREE, private - auto-managed)"
+    echo "  $0 interview.mp3 --provider ollama"
     echo ""
     echo "  # Using DeepSeek (very cost-effective)"
     echo "  $0 interview.mp3 --provider deepseek"
@@ -52,7 +51,6 @@ AI_PROVIDER="openai"  # Default to OpenAI (ChatGPT-5)
 OPENAI_MODEL="chatgpt-4o-latest"
 GEMINI_MODEL="gemini-1.5-pro"
 DEEPSEEK_MODEL="deepseek-chat"
-OLLAMA_MODEL="qwen2.5:32b"
 SKIP_CORRECTION=false
 
 # Parse optional arguments
@@ -76,10 +74,6 @@ while [[ $# -gt 0 ]]; do
             ;;
         --deepseek-model)
             DEEPSEEK_MODEL="$2"
-            shift 2
-            ;;
-        --ollama-model)
-            OLLAMA_MODEL="$2"
             shift 2
             ;;
         --skip-correction)
@@ -146,7 +140,7 @@ if [ "$SKIP_CORRECTION" = false ]; then
     elif [ "$AI_PROVIDER" = "deepseek" ]; then
         echo "DeepSeek model: $DEEPSEEK_MODEL"
     elif [ "$AI_PROVIDER" = "ollama" ]; then
-        echo "Ollama model: $OLLAMA_MODEL"
+        echo "Ollama model: qwen2.5:32b (hardcoded, auto-managed)"
     fi
 else
     echo "AI correction: DISABLED"
@@ -201,8 +195,6 @@ if [ "$SKIP_CORRECTION" = false ]; then
         CMD="$CMD --gemini-model \"$GEMINI_MODEL\""
     elif [ "$AI_PROVIDER" = "deepseek" ]; then
         CMD="$CMD --deepseek-model \"$DEEPSEEK_MODEL\""
-    elif [ "$AI_PROVIDER" = "ollama" ]; then
-        CMD="$CMD --ollama-model \"$OLLAMA_MODEL\""
     fi
     
     eval $CMD
