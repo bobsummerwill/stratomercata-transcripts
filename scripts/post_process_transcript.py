@@ -346,8 +346,11 @@ def process_transcript(transcript_path, api_key, provider="anthropic",
         # Save partial file for inspection to outputs directory
         output_dir = Path("outputs")
         output_dir.mkdir(exist_ok=True)
-        base_name = transcript_file.stem.replace('_transcript_with_speakers', '').replace('_lv2_lq', '').replace('_lv2_hq', '')
-        partial_path = output_dir / f"{base_name}_corrected_PARTIAL.txt"
+        base_name = transcript_file.stem.replace('_transcript_with_speakers', '')
+        # Remove any model version indicators
+        base_name = base_name.replace('_lv2', '').replace('_lv3', '').replace('_dlv3', '')
+        base_name = base_name.replace('_lq', '').replace('_hq', '')
+        partial_path = output_dir / f"{base_name}_{provider}_corrected_PARTIAL.txt"
         with open(partial_path, 'w', encoding='utf-8') as f:
             f.write(corrected_clean)
         print(f"   Saved PARTIAL output for inspection: {partial_path}")
@@ -358,9 +361,11 @@ def process_transcript(transcript_path, api_key, provider="anthropic",
     output_dir = Path("outputs")
     output_dir.mkdir(exist_ok=True)
     
-    # Clean up filename: remove model/quality suffixes and _transcript_with_speakers
-    # Keep Whisper model indicator (lv2, lv3, etc.) if present, add AI provider name
+    # Clean up filename: remove all model indicators and _transcript_with_speakers
     base_name = transcript_file.stem.replace('_transcript_with_speakers', '')
+    # Remove any model version indicators (lv2, lv3, dlv3, etc.)
+    base_name = base_name.replace('_lv2', '').replace('_lv3', '').replace('_dlv3', '')
+    base_name = base_name.replace('_lq', '').replace('_hq', '')
     output_path = output_dir / f"{base_name}_{provider}_corrected.txt"
     
     with open(output_path, 'w', encoding='utf-8') as f:

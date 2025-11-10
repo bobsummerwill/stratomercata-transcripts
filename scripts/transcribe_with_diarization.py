@@ -26,21 +26,22 @@ torch.backends.cuda.matmul.fp32_precision = 'tf32'
 torch.backends.cuda.matmul.allow_tf32 = True
 torch.backends.cudnn.allow_tf32 = True
 
-def transcribe_audio(audio_path, device, model_name="large-v2", batch_size=None):
-    """Run WhisperX transcription with int8 quantization - hardcoded to English
+def transcribe_audio(audio_path, device, batch_size=None):
+    """Run WhisperX transcription with float16 quantization - hardcoded to English and large-v3
     
     Args:
         audio_path: Path to audio file
         device: Device to use (cuda/cpu)
-        model_name: Model to use (large-v2, large-v3, turbo, distil-large-v3)
         batch_size: Batch size (auto-determined if None)
     """
+    # Always use large-v3 for best accuracy (~10% better than large-v2)
+    model_name = "large-v3"
     print("\n" + "="*60)
     print("Step 1: Transcribing audio with WhisperX...")
     print("="*60)
     
     # Use float16 instead of int8 to avoid TF32 conflicts with pyannote.audio
-    # float16 provides excellent quality with low VRAM usage (~6GB for large-v2)
+    # float16 provides excellent quality with low VRAM usage (~6GB for large-v3)
     compute_type = "float16" if device == "cuda" else "int8"
     
     # Auto-determine batch size if not specified
@@ -239,9 +240,6 @@ Processing options:
                        help="Force CPU processing even if GPU available")
     parser.add_argument("--batch-size", type=int, default=None,
                        help="Override automatic batch size (smaller=more thorough, larger=faster)")
-    parser.add_argument("--model", default="large-v2",
-                       choices=["large-v2", "large-v3", "turbo", "distil-large-v3"],
-                       help="Whisper model to use (default: large-v2)")
     
     args = parser.parse_args()
     
@@ -262,11 +260,10 @@ Processing options:
     if args.output:
         output_path = Path(args.output)
     else:
-        # Build filename with model info and save to intermediates/
-        model_short = args.model.replace("distil-", "d").replace("large-", "l")
+        # Build filename without model indicator (always using large-v3)
         intermediates_dir = Path("intermediates")
         intermediates_dir.mkdir(exist_ok=True)
-        output_path = intermediates_dir / f"{audio_path.stem}_{model_short}_transcript_with_speakers.txt"
+        output_path = intermediates_dir / f"{audio_path.stem}_transcript_with_speakers.txt"
     
     # Setup device based on flags
     if args.force_cpu:
@@ -282,8 +279,8 @@ Processing options:
     print(f"Device: {device}" + (" (forced)" if args.force_cpu else ""))
     if device == "cuda":
         print(f"GPU: {torch.cuda.get_device_name(0)}")
-    print(f"Model: {args.model}")
-    print(f"Compute type: int8 (optimal quality/VRAM balance)")
+    print(f"Model: large-v3 (hardcoded for best accuracy)")
+    print(f"Compute type: float16 (optimal quality/VRAM balance)")
     if args.batch_size:
         print(f"Batch size: {args.batch_size} (user override)")
     print("="*60)
@@ -293,9 +290,8 @@ Processing options:
     
     # Run pipeline
     try:
-        # Step 1: Transcribe (English hardcoded, int8 quantization)
+        # Step 1: Transcribe (English and large-v3 hardcoded, float16 quantization)
         result = transcribe_audio(str(audio_path), device, 
-                                 model_name=args.model,
                                  batch_size=args.batch_size)
         
         # Step 2: Diarize
