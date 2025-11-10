@@ -10,8 +10,25 @@ Now supports batch processing of multiple transcripts × processors internally
 import os
 import sys
 import json
+import time
 from pathlib import Path
 import argparse
+
+# ANSI color codes
+class Colors:
+    GREEN = '\033[92m'
+    RED = '\033[91m'
+    YELLOW = '\033[93m'
+    RESET = '\033[0m'
+
+def success(msg):
+    return f"{Colors.GREEN}✓{Colors.RESET} {msg}"
+
+def failure(msg):
+    return f"{Colors.RED}✗{Colors.RESET} {msg}"
+
+def skip(msg):
+    return f"{Colors.YELLOW}⊘{Colors.RESET} {msg}"
 
 # Shared instruction template for all AI providers
 SYSTEM_PROMPT = "You are an expert transcript editor specializing in Ethereum and blockchain technology."
