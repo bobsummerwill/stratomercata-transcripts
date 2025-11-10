@@ -177,7 +177,7 @@ for i in "${!TRANSCRIBER_ARRAY[@]}"; do
             if [ -n "$BATCH_SIZE" ]; then
                 CMD="$CMD --batch-size $BATCH_SIZE"
             fi
-            TRANSCRIPT_FILE="intermediates/${BASE_NAME}_transcript_with_speakers.txt"
+            TRANSCRIPT_FILE="intermediates/${BASE_NAME}_whisperx_transcript_with_speakers.txt"
             ;;
         deepgram)
             if [ -z "${DEEPGRAM_API_KEY:-}" ]; then
