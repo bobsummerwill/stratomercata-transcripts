@@ -209,7 +209,7 @@ def test_openai_context(test_sizes=[10000, 50000, 100000, 120000, 128000]):
     
     results = {
         "provider": "OpenAI",
-        "model": "gpt-4o-2025-08-06",
+        "model": "gpt-4o-2024-11-20",
         "advertised": "128,000 tokens",
         "tested": [],
         "max_working": 0,
@@ -223,7 +223,7 @@ def test_openai_context(test_sizes=[10000, 50000, 100000, 120000, 128000]):
         try:
             start = time.time()
             response = client.chat.completions.create(
-                model="gpt-4o-2025-08-06",
+                model="gpt-4o-2024-11-20",
                 max_tokens=50,
                 messages=[{
                     "role": "user",
@@ -272,14 +272,14 @@ def test_gemini_context(test_sizes=[10000, 50000, 100000, 120000, 128000]):
     
     results = {
         "provider": "Google",
-        "model": "gemini-2.0-flash-exp",
+        "model": "gemini-2.5-pro",
         "advertised": "128,000 tokens (some claim 1M)",
         "tested": [],
         "max_working": 0,
         "status": "tested"
     }
     
-    model = genai.GenerativeModel('gemini-2.0-flash-exp')
+    model = genai.GenerativeModel('gemini-2.5-pro')
     
     for size in test_sizes:
         print(f"  Testing {size:,} tokens...", end=" ", flush=True)

@@ -294,31 +294,8 @@ def process_with_anthropic(transcript, api_key, context):
     print(" ✓")
     return result
 
-def split_transcript_by_speakers(transcript, max_chunk_size=15000):
-    """Split transcript into chunks at speaker boundaries"""
-    lines = transcript.split('\n')
-    chunks = []
-    current_chunk = []
-    current_size = 0
-    
-    for line in lines:
-        line_size = len(line)
-        
-        if current_size + line_size > max_chunk_size and current_chunk:
-            chunks.append('\n'.join(current_chunk))
-            current_chunk = []
-            current_size = 0
-        
-        current_chunk.append(line)
-        current_size += line_size + 1
-    
-    if current_chunk:
-        chunks.append('\n'.join(current_chunk))
-    
-    return chunks
-
 def process_with_openai(transcript, api_key, context):
-    """Process transcript using OpenAI GPT-4o"""
+    """Process transcript using OpenAI GPT-4o with streaming"""
     model = "gpt-4o-2024-11-20"
     try:
         import openai
@@ -326,33 +303,36 @@ def process_with_openai(transcript, api_key, context):
         raise ImportError("openai package not installed. Install with: pip install openai")
     
     client = openai.OpenAI(api_key=api_key)
+    prompt = build_prompt(context, transcript)
     
     print(f"      Transcript size: {len(transcript)} chars")
-    print(f"      Chunking for complete output...")
+    print(f"      Processing: ", end='', flush=True)
     
-    chunks = split_transcript_by_speakers(transcript, max_chunk_size=15000)
-    print(f"      Processing {len(chunks)} chunks: ", end='', flush=True)
+    result = ""
+    chunk_count = 0
     
-    corrected_chunks = []
-    for i, chunk in enumerate(chunks, 1):
-        prompt = build_prompt(context, chunk)
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=16384
-        )
-        
-        corrected_chunks.append(response.choices[0].message.content)
-        print(".", end='', flush=True)
+    stream = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=16384,
+        stream=True
+    )
+    
+    for chunk in stream:
+        if chunk.choices[0].delta.content:
+            result += chunk.choices[0].delta.content
+            chunk_count += 1
+            if chunk_count % 100 == 0:
+                print(".", end='', flush=True)
     
     print(" ✓")
-    return '\n\n'.join(corrected_chunks)
+    return result
 
 def process_with_gemini(transcript, api_key, context):
-    """Process transcript using Google Gemini 2.5 Pro"""
+    """Process transcript using Google Gemini 2.5 Pro with streaming"""
     model = "gemini-2.5-pro"
     try:
         import google.generativeai as genai
@@ -366,13 +346,23 @@ def process_with_gemini(transcript, api_key, context):
     print(f"      Processing: ", end='', flush=True)
     
     model_instance = genai.GenerativeModel(model)
-    response = model_instance.generate_content(prompt)
+    result = ""
+    chunk_count = 0
     
-    print("✓")
-    return response.text
+    response = model_instance.generate_content(prompt, stream=True)
+    
+    for chunk in response:
+        if chunk.text:
+            result += chunk.text
+            chunk_count += 1
+            if chunk_count % 100 == 0:
+                print(".", end='', flush=True)
+    
+    print(" ✓")
+    return result
 
 def process_with_deepseek(transcript, api_key, context):
-    """Process transcript using DeepSeek Chat"""
+    """Process transcript using DeepSeek Chat with streaming"""
     model = "deepseek-chat"
     try:
         import openai
@@ -380,30 +370,33 @@ def process_with_deepseek(transcript, api_key, context):
         raise ImportError("openai package not installed")
     
     client = openai.OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
+    prompt = build_prompt(context, transcript)
     
     print(f"      Transcript size: {len(transcript)} chars")
-    print(f"      Chunking for complete output...")
+    print(f"      Processing: ", end='', flush=True)
     
-    chunks = split_transcript_by_speakers(transcript, max_chunk_size=15000)
-    print(f"      Processing {len(chunks)} chunks: ", end='', flush=True)
+    result = ""
+    chunk_count = 0
     
-    corrected_chunks = []
-    for i, chunk in enumerate(chunks, 1):
-        prompt = build_prompt(context, chunk)
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=8192
-        )
-        
-        corrected_chunks.append(response.choices[0].message.content)
-        print(".", end='', flush=True)
+    stream = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=8192,
+        stream=True
+    )
+    
+    for chunk in stream:
+        if chunk.choices[0].delta.content:
+            result += chunk.choices[0].delta.content
+            chunk_count += 1
+            if chunk_count % 100 == 0:
+                print(".", end='', flush=True)
     
     print(" ✓")
-    return '\n\n'.join(corrected_chunks)
+    return result
 
 def process_with_ollama(transcript, context, ollama_process=None):
     """Process transcript using local Ollama - reuses existing process if provided"""
