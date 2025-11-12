@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Multi-provider AI transcript post-processor for Ethereum/blockchain content
-Supports: Claude (Anthropic), GPT-4o (OpenAI), Gemini (Google), DeepSeek, Kimi K2 (Moonshot via Novita), Qwen (local via Ollama)
+Supports: Claude (Anthropic), GPT-4o (OpenAI), Gemini (Google), DeepSeek, Kimi K2 (Moonshot via Novita), Qwen3Max (via Novita), Qwen (local via Ollama)
 Uses domain context to correct technical terms and speaker names
 
 Now supports batch processing of multiple transcripts × processors internally
@@ -400,6 +400,49 @@ def process_with_deepseek(transcript, api_key, context):
     print(" ✓")
     return result
 
+def process_with_qwen3max(transcript, api_key, context):
+    """Process transcript using Alibaba Qwen 3 Max model (via Novita AI) with streaming
+    
+    Uses qwen/qwen3-max - flagship Qwen model with strong reasoning capabilities
+    Excellent for complex technical content requiring deep understanding
+    """
+    model = "qwen/qwen3-max"
+    try:
+        import openai
+    except ImportError:
+        raise ImportError("openai package not installed")
+    
+    client = openai.OpenAI(api_key=api_key, base_url="https://api.novita.ai/openai/v1")
+    prompt = build_prompt(context, transcript)
+    
+    print(f"      Transcript size: {len(transcript)} chars")
+    print(f"      Model: {model}")
+    print(f"      Processing: ", end='', flush=True)
+    
+    result = ""
+    chunk_count = 0
+    
+    stream = client.chat.completions.create(
+        model=model,
+        messages=[
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": prompt}
+        ],
+        max_tokens=32768,  # Large output for detailed transcripts
+        temperature=0.3,   # Lower temperature for more consistent, accurate output
+        stream=True
+    )
+    
+    for chunk in stream:
+        if chunk.choices[0].delta.content:
+            result += chunk.choices[0].delta.content
+            chunk_count += 1
+            if chunk_count % 100 == 0:
+                print(".", end='', flush=True)
+    
+    print(" ✓")
+    return result
+
 def process_with_kimi(transcript, api_key, context):
     """Process transcript using Moonshot Kimi K2 Thinking model (via Novita AI) with streaming
     
@@ -602,6 +645,8 @@ def process_single_combination(transcript_path, provider, api_keys, context, oll
             corrected = process_with_deepseek(transcript, api_keys['deepseek'], context)
         elif provider == "kimi":
             corrected = process_with_kimi(transcript, api_keys['kimi'], context)
+        elif provider == "qwen3max":
+            corrected = process_with_qwen3max(transcript, api_keys['qwen3max'], context)
         elif provider == "qwen":
             corrected, new_ollama_process = process_with_qwen(transcript, context, ollama_process)
     except Exception as e:
@@ -655,7 +700,7 @@ def main():
     
     parser.add_argument("transcripts", nargs='+', help="Transcript file path(s)")
     parser.add_argument("--processors", required=True,
-                       help="Comma-separated list of processors (anthropic,openai,gemini,deepseek,kimi,qwen)")
+                       help="Comma-separated list of processors (anthropic,openai,gemini,deepseek,kimi,qwen3max,qwen)")
     
     args = parser.parse_args()
     
@@ -683,7 +728,7 @@ def main():
     
     # Parse processors
     processors = [p.strip() for p in args.processors.split(',')]
-    valid_processors = {'anthropic', 'openai', 'gemini', 'deepseek', 'kimi', 'qwen'}
+    valid_processors = {'anthropic', 'openai', 'gemini', 'deepseek', 'kimi', 'qwen3max', 'qwen'}
     
     for proc in processors:
         if proc not in valid_processors:
@@ -701,7 +746,8 @@ def main():
         'openai': 'OPENAI_API_KEY',
         'gemini': 'GOOGLE_API_KEY',
         'deepseek': 'DEEPSEEK_API_KEY',
-        'kimi': 'NOVITA_API_KEY'  # Kimi K2 via Novita platform
+        'kimi': 'NOVITA_API_KEY',      # Kimi K2 via Novita platform
+        'qwen3max': 'NOVITA_API_KEY'   # Qwen 3 Max via Novita platform
     }
     
     for proc in processors:
