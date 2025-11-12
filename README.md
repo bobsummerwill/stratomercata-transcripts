@@ -45,7 +45,6 @@ All services include speaker diarization (identifying who said what).
 | Service | Model | Type | Cost/hour | Speed |
 |---------|-------|------|-----------|-------|
 | **WhisperX** | large-v3 | Local GPU | FREE | 5-10 min |
-| **Kimi-Audio** | 7B-Instruct | Local GPU | FREE | ~1.5x RT |
 | **Deepgram** | nova-3-general | Cloud API | $0.41 | 23 sec |
 | **AssemblyAI** | Best | Cloud API | $1.44 | 3-4 min |
 | **Sonix** | Standard | Cloud API | $10.00 | ~2 min |
@@ -135,17 +134,17 @@ Add to `setup_env.sh`:
 export HF_TOKEN="hf_..."  # https://huggingface.co/settings/tokens
 
 # Optional: Cloud transcription services
-export DEEPGRAM_API_KEY="..."       # https://console.deepgram.com/
-export ASSEMBLYAI_API_KEY="..."     # https://www.assemblyai.com/
-export SONIX_API_KEY="..."          # https://sonix.ai/
-export SPEECHMATICS_API_KEY="..."  # https://www.speechmatics.com/
-export OPENAI_API_KEY="sk-..."      # https://platform.openai.com/
+export DEEPGRAM_API_KEY="..."         # https://console.deepgram.com/
+export ASSEMBLYAI_API_KEY="..."       # https://www.assemblyai.com/
+export SONIX_API_KEY="..."            # https://sonix.ai/
+export SPEECHMATICS_API_KEY="..."     # https://www.speechmatics.com/
+export NOVITA_API_KEY="..."           # https://novita.ai/
 
 # Optional: AI post-processors
 export ANTHROPIC_API_KEY="sk-ant-..."  # https://console.anthropic.com/
+export OPENAI_API_KEY="sk-..."         # https://platform.openai.com/
 export GOOGLE_API_KEY="..."            # https://makersuite.google.com/
-export DEEPSEEK_API_KEY="sk-..."      # https://platform.deepseek.com/
-export MOONSHOT_API_KEY="sk-..."      # https://platform.moonshot.cn/
+export DEEPSEEK_API_KEY="sk-..."       # https://platform.deepseek.com/
 ```
 
 ## Output Files
@@ -154,7 +153,6 @@ export MOONSHOT_API_KEY="sk-..."      # https://platform.moonshot.cn/
 ```
 intermediates/
   audio_whisperx_raw.txt         # WhisperX output
-  audio_kimi_raw.txt             # Kimi-Audio output
   audio_deepgram_raw.txt          # Deepgram output
   audio_whisperx_raw.md           # Markdown version
 ```
@@ -173,7 +171,7 @@ outputs/
 
 Where:
 - `{basename}` = Original audio filename without extension
-- `{transcriber}` = whisperx, kimi, deepgram, assemblyai, sonix, speechmatics, or novita
+- `{transcriber}` = whisperx, deepgram, assemblyai, sonix, speechmatics, or novita
 - `{processor}` = anthropic, openai, gemini, deepseek, or ollama
 
 ## GPU Support
@@ -210,11 +208,20 @@ stratomercata-transcripts/
 
 ## Resources
 
-- [WhisperX](https://github.com/m-bain/whisperX) - GPU-accelerated Whisper with diarization
+### Transcription Services
+- [AssemblyAI](https://www.assemblyai.com/docs) - Cloud transcription with speaker diarization
 - [Deepgram](https://developers.deepgram.com/) - Cloud speech-to-text API
-- [AssemblyAI](https://www.assemblyai.com/docs) - Cloud transcription API
-- [Anthropic Claude](https://docs.anthropic.com/) - AI post-processing
-- [OpenAI GPT-4](https://platform.openai.com/docs) - AI post-processing
+- [Novita AI](https://novita.ai/) - Cloud transcription service
+- [Sonix](https://sonix.ai/) - Cloud transcription with speaker identification
+- [Speechmatics](https://www.speechmatics.com/) - Enhanced cloud transcription API
+- [WhisperX](https://github.com/m-bain/whisperX) - GPU-accelerated Whisper with diarization
+
+### AI Post-Processors
+- [Anthropic Claude](https://docs.anthropic.com/) - AI text processing with large context windows
+- [DeepSeek](https://www.deepseek.com/) - Cost-effective AI processing
+- [Google Gemini](https://ai.google.dev/) - AI processing optimized for long transcripts
+- [Ollama](https://ollama.com/) - Local AI model hosting (Qwen 2.5)
+- [OpenAI GPT-4](https://platform.openai.com/docs) - Reliable AI post-processing
 
 ## License
 

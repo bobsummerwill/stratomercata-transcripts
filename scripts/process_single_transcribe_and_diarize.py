@@ -166,7 +166,7 @@ def main():
     
     # Parse transcribers
     transcribers = [t.strip() for t in args.transcribers.split(',')]
-    valid_transcribers = {'whisperx', 'deepgram', 'assemblyai', 'sonix', 'speechmatics', 'novita', 'kimi'}
+    valid_transcribers = {'whisperx', 'deepgram', 'assemblyai', 'sonix', 'speechmatics', 'novita'}
     
     for transcriber in transcribers:
         if transcriber not in valid_transcribers:
@@ -231,8 +231,6 @@ def main():
             _, skip_reason = validate_api_key('HF_TOKEN')
         elif transcriber == 'novita':
             _, skip_reason = validate_api_key('NOVITA_API_KEY')
-        elif transcriber == 'kimi':
-            _, skip_reason = validate_api_key('HF_TOKEN')
         
         if skip_reason:
             print(skip(f"{transcriber}: {skip_reason}"))
@@ -258,8 +256,6 @@ def main():
                 output_path = transcribe_speechmatics(str(audio_path), args.output_dir)
             elif transcriber == 'novita':
                 output_path = transcribe_novita(str(audio_path), args.output_dir)
-            elif transcriber == 'kimi':
-                output_path = transcribe_kimi_audio(str(audio_path), args.output_dir, args.force_cpu)
             
             elapsed = time.time() - transcriber_start
             results.append((transcriber, output_path, 'success', elapsed))
@@ -797,15 +793,17 @@ def transcribe_speechmatics(audio_path, output_dir):
     response.raise_for_status()
     transcript_data = response.json()
     
-    # Format output
-    output_lines = []
-    current_speaker = None
-    
+    # Collect all words with speaker info (Speechmatics returns word-level data)
+    words_by_speaker = []
     for result in transcript_data.get('results', []):
         for alternative in result.get('alternatives', []):
-            content = alternative.get('content', '')
+            content = alternative.get('content', '').strip()
+            if not content:
+                continue
+                
             speaker = alternative.get('speaker', 'SPEAKER_00')
             start = result.get('start_time', 0)
+            word_type = alternative.get('type', 'word')
             
             # Normalize speaker label
             if not speaker.startswith('SPEAKER_'):
@@ -813,23 +811,80 @@ def transcribe_speechmatics(audio_path, output_dir):
             else:
                 speaker_label = speaker
             
-            if speaker_label != current_speaker:
-                if output_lines:
-                    output_lines.append('')
-                output_lines.append(f'{speaker_label}:')
-                current_speaker = speaker_label
-            
-            output_lines.append(f'[{start:.1f}s] {content}')
+            words_by_speaker.append({
+                'speaker': speaker_label,
+                'start': start,
+                'content': content,
+                'type': word_type
+            })
     
-    # Count speakers
-    speakers = set()
-    for result in transcript_data.get('results', []):
-        for alternative in result.get('alternatives', []):
-            speaker = alternative.get('speaker', 'SPEAKER_00')
-            if not speaker.startswith('SPEAKER_'):
-                speaker = f"SPEAKER_{speaker:02d}" if isinstance(speaker, int) else speaker
-            speakers.add(speaker)
+    # Group consecutive words by speaker into phrases
+    phrases = []
+    current_phrase = []
+    current_speaker = None
+    current_start = 0
     
+    for word_data in words_by_speaker:
+        speaker = word_data['speaker']
+        content = word_data['content']
+        start = word_data['start']
+        word_type = word_data['type']
+        
+        # Start new phrase on speaker change
+        if speaker != current_speaker:
+            if current_phrase:
+                phrases.append({
+                    'speaker': current_speaker,
+                    'start': current_start,
+                    'text': ' '.join(current_phrase)
+                })
+            current_phrase = [content]
+            current_speaker = speaker
+            current_start = start
+        else:
+            # Add to current phrase
+            # Handle punctuation (don't add space before punctuation)
+            if word_type == 'punctuation':
+                if current_phrase:
+                    current_phrase[-1] = current_phrase[-1] + content
+                else:
+                    current_phrase.append(content)
+            else:
+                current_phrase.append(content)
+        
+        # Break phrases at sentence endings for readability
+        if content in ['.', '?', '!'] and len(current_phrase) > 10:
+            phrases.append({
+                'speaker': current_speaker,
+                'start': current_start,
+                'text': ' '.join(current_phrase)
+            })
+            current_phrase = []
+            current_start = start
+    
+    # Add final phrase
+    if current_phrase:
+        phrases.append({
+            'speaker': current_speaker,
+            'start': current_start,
+            'text': ' '.join(current_phrase)
+        })
+    
+    # Format output
+    output_lines = []
+    last_speaker = None
+    
+    for phrase in phrases:
+        speaker = phrase['speaker']
+        if speaker != last_speaker:
+            if output_lines:
+                output_lines.append('')
+            output_lines.append(f'{speaker}:')
+            last_speaker = speaker
+        output_lines.append(f'[{phrase["start"]:.1f}s] {phrase["text"]}')
+    
+    # Count unique speakers
+    speakers = set(phrase['speaker'] for phrase in phrases)
     print(f"  Detected {len(speakers)} speakers")
     
     formatted_text = '\n'.join(output_lines) + '\n'
@@ -953,174 +1008,6 @@ def transcribe_novita(audio_path, output_dir):
     # Save using utility function
     formatted_text = '\n'.join(output_lines) + '\n'
     return save_raw_transcript_from_text(output_dir, audio_file_path.stem, "novita", formatted_text)
-
-
-def transcribe_kimi_audio(audio_path, output_dir, force_cpu=False):
-    """Kimi-Audio-7B-Instruct local transcription with integrated speaker diarization"""
-    import time
-    import torch
-    import warnings
-    from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor
-    
-    # Suppress warnings
-    warnings.filterwarnings('ignore')
-    
-    # Get HuggingFace token
-    hf_token = os.environ.get('HF_TOKEN')
-    if not hf_token:
-        raise ValueError("HF_TOKEN environment variable not set")
-    
-    # Setup device
-    if force_cpu:
-        device = "cpu"
-        torch_dtype = torch.float32
-    else:
-        device = "cuda" if torch.cuda.is_available() else "cpu"
-        torch_dtype = torch.bfloat16 if device == "cuda" else torch.float32
-    
-    audio_file_path = Path(audio_path)
-    
-    print(f"  Model: Kimi-Audio-7B-Instruct")
-    print(f"  Device: {device}")
-    print(f"  Dtype: {torch_dtype}")
-    
-    start = time.time()
-    
-    # Load model and processor
-    print("  → Loading model...")
-    model_id = "FunAudioLLM/Kimi-Audio-7B-Instruct"
-    
-    try:
-        processor = AutoProcessor.from_pretrained(
-            model_id,
-            token=hf_token,
-            trust_remote_code=True
-        )
-        
-        model = AutoModelForSpeechSeq2Seq.from_pretrained(
-            model_id,
-            torch_dtype=torch_dtype,
-            token=hf_token,
-            trust_remote_code=True,
-            low_cpu_mem_usage=True
-        )
-        model.to(device)
-        
-    except Exception as e:
-        raise RuntimeError(f"Failed to load Kimi-Audio model: {e}")
-    
-    # Load and process audio
-    print("  → Loading audio...")
-    import librosa
-    
-    # Load audio at 16kHz (standard for speech models)
-    audio_array, sr = librosa.load(audio_file_path, sr=16000, mono=True)
-    
-    # Kimi-Audio handles ~2-3 min chunks natively
-    # For longer files, we'll chunk at 2-minute intervals
-    chunk_duration = 120  # seconds
-    chunk_samples = chunk_duration * sr
-    
-    # Split into chunks if needed
-    audio_chunks = []
-    if len(audio_array) > chunk_samples:
-        print(f"  → Splitting audio into {len(audio_array) // chunk_samples + 1} chunks...")
-        for i in range(0, len(audio_array), chunk_samples):
-            audio_chunks.append(audio_array[i:i + chunk_samples])
-    else:
-        audio_chunks = [audio_array]
-    
-    # Process each chunk
-    print(f"  → Transcribing and diarizing {len(audio_chunks)} chunk(s)...")
-    all_segments = []
-    time_offset = 0.0
-    
-    for chunk_idx, audio_chunk in enumerate(audio_chunks):
-        # Prepare inputs
-        inputs = processor(
-            audio_chunk,
-            sampling_rate=sr,
-            return_tensors="pt",
-            padding=True
-        )
-        
-        # Move to device
-        inputs = {k: v.to(device) if isinstance(v, torch.Tensor) else v 
-                 for k, v in inputs.items()}
-        
-        # Generate with speaker diarization
-        with torch.no_grad():
-            generated_ids = model.generate(
-                **inputs,
-                max_length=1024,
-                num_beams=1,
-                do_sample=False,
-                task="transcribe_with_speakers"  # Request diarization
-            )
-        
-        # Decode output
-        transcription = processor.batch_decode(
-            generated_ids,
-            skip_special_tokens=True
-        )[0]
-        
-        # Parse output format (Kimi-Audio outputs: "<speaker_0> text </speaker_0><speaker_1> text </speaker_1>")
-        # Extract segments with timestamps and speakers
-        import re
-        
-        # Pattern to match speaker tags and content
-        speaker_pattern = r'<speaker_(\d+)>(.*?)</speaker_\1>'
-        matches = re.finditer(speaker_pattern, transcription, re.DOTALL)
-        
-        current_time = time_offset
-        
-        for match in matches:
-            speaker_id = int(match.group(1))
-            text = match.group(2).strip()
-            
-            if text:
-                # Estimate timing based on text length (rough approximation)
-                # Real Kimi-Audio might provide timestamps - adjust if available
-                words = text.split()
-                duration = len(words) * 0.4  # ~0.4s per word average
-                
-                all_segments.append({
-                    'speaker': f'SPEAKER_{speaker_id:02d}',
-                    'start': current_time,
-                    'text': text
-                })
-                
-                current_time += duration
-        
-        # If no speaker tags found, treat as single speaker
-        if not list(re.finditer(speaker_pattern, transcription)):
-            all_segments.append({
-                'speaker': 'SPEAKER_00',
-                'start': time_offset,
-                'text': transcription.strip()
-            })
-        
-        # Update time offset for next chunk
-        time_offset += len(audio_chunk) / sr
-        
-        print(f"    Chunk {chunk_idx + 1}/{len(audio_chunks)} complete")
-    
-    # Count unique speakers
-    speakers = set(seg['speaker'] for seg in all_segments)
-    print(f"  → Detected {len(speakers)} speakers")
-    
-    # Save using utility function
-    output_path = save_transcript_files(
-        output_dir,
-        audio_file_path.stem,
-        "kimi",
-        all_segments
-    )
-    
-    elapsed = time.time() - start
-    print(f"  Completed in {elapsed:.1f}s ({elapsed/60:.1f} min)")
-    
-    return output_path
 
 
 if __name__ == "__main__":
