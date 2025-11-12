@@ -52,16 +52,24 @@ All services include speaker diarization (identifying who said what).
 
 ## AI Post-Processors
 
-| Provider | Model | Type | Context | Cost | Features |
-|----------|-------|------|---------|------|----------|
-| **Anthropic** | Claude Sonnet 4.5 | Cloud API | 200K | $3/M tokens | Streaming, 64K output |
-| **OpenAI** | GPT-4o | Cloud API | 128K | $2.50/M tokens | Reliable, fast |
-| **Gemini** | Gemini 2.5 Pro | Cloud API | 128K | $1.25/M tokens | Best for long transcripts |
-| **DeepSeek** | DeepSeek Chat | Cloud API | 64K | $0.14/M tokens | Cost-effective |
-| **Novita** | Kimi K2 Thinking | Cloud API | 128K+ | Varies | Advanced reasoning |
-| **Qwen (Ollama)** | Qwen2.5:7b | Local | 32K | FREE | Local, private ⚠️ |
+| Provider | Model | Type | Context | Cost (Input/Output) | Best For |
+|----------|-------|------|---------|---------------------|----------|
+| **Anthropic** | Claude Sonnet 4.5 | Cloud API | 200K | $3/$15 per MTok | Complex technical content, long transcripts |
+| **OpenAI** | GPT-4o | Cloud API | 128K | $1.25/$10 per MTok | Reliable, consistent results |
+| **Gemini** | Gemini 2.5 Pro | Cloud API | 128K | ~$1.25 per MTok | Very long transcripts, multilingual |
+| **Novita** | Kimi K2 Thinking | Cloud API | 262K | $0.60/$2.50 per MTok | Advanced reasoning, cost-effective |
+| **DeepSeek** | DeepSeek Chat | Cloud API | 64K | $0.27/$1.12 per MTok | Budget-friendly, good quality |
+| **Qwen (Ollama)** | Qwen2.5:7b | Local | 32K | FREE | Local, private, 12GB GPU ⚠️ |
 
-**Note on Qwen:** Alibaba's Qwen 2.5 model served locally via Ollama. The 32K context limit is suitable for transcripts up to ~40 minutes. Typical 60-90 minute transcripts (~45K tokens) may be truncated. For longer content, use cloud providers.
+**Model Selection Notes:**
+- **For best quality:** Use Anthropic Claude Sonnet 4.5 or OpenAI GPT-4o
+- **For cost-effectiveness:** Novita Kimi K2 or DeepSeek offer excellent value
+- **For maximum context:** Novita Kimi K2 (262K) or Anthropic Claude (200K)
+- **For privacy:** Run Qwen locally via Ollama (requires 12GB+ GPU)
+
+**Premium Models via Novita:** Novita provides access to additional high-performance models including Qwen3 Max ($2.11/$8.45), DeepSeek V3.1 ($0.27/$1), and 60+ other models. [See full list](https://novita.ai/model-api/product/llm-api).
+
+**Ollama Note:** The 32K context limit suits ~40-minute transcripts. Typical 60-90 minute transcripts (~45K tokens) may be truncated. For longer content, use cloud providers.
 
 ## Usage Examples
 
