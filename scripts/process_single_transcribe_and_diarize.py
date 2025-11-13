@@ -11,7 +11,8 @@ import time
 from pathlib import Path
 
 # Import shared utilities
-from common import Colors, success, failure, skip, validate_api_key, load_vocabulary, save_transcript_dual_format
+from common import (Colors, success, failure, skip, validate_api_key, 
+                    load_vocabulary, save_transcript_dual_format, cleanup_gpu_memory)
 
 
 # ============================================================================
@@ -272,6 +273,15 @@ def transcribe_whisperx(audio_path, output_dir, force_cpu=False):
     import whisperx
     import torch
     from pyannote.audio import Pipeline
+    import gc
+    
+    # ========================================================================
+    # GPU CLEANUP - Prevent CUDA OOM from zombie processes/fragmented memory
+    # ========================================================================
+    print("  → Cleaning GPU memory...")
+    cleanup_gpu_memory(force_cpu)
+    if torch.cuda.is_available() and not force_cpu:
+        print("  ✓ GPU memory cleared")
     
     # Suppress pyannote warnings
     warnings.filterwarnings('ignore', category=UserWarning,
@@ -306,15 +316,40 @@ def transcribe_whisperx(audio_path, output_dir, force_cpu=False):
     
     start = time.time()
     
-    # Step 1: Transcribe
+    # Step 1: Transcribe with OOM retry
     print("  → Transcribing...")
-    model = whisperx.load_model(model_name, device, compute_type=compute_type, language="en")
-    audio = whisperx.load_audio(audio_path)
-    result = model.transcribe(audio, batch_size=batch_size, language='en')
     
-    # Align
-    model_a, metadata = whisperx.load_align_model(language_code="en", device=device)
-    result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False)
+    try:
+        model = whisperx.load_model(model_name, device, compute_type=compute_type, language="en")
+        audio = whisperx.load_audio(audio_path)
+        result = model.transcribe(audio, batch_size=batch_size, language='en')
+        
+        # Align
+        model_a, metadata = whisperx.load_align_model(language_code="en", device=device)
+        result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False)
+        
+    except RuntimeError as e:
+        if "out of memory" in str(e).lower() and device == "cuda":
+            print(f"  ⚠ OOM with batch_size={batch_size}, retrying with batch_size=8...")
+            
+            # Clear memory and retry
+            if 'model' in locals():
+                del model
+            if 'model_a' in locals():
+                del model_a
+            cleanup_gpu_memory(force_cpu)
+            time.sleep(2)
+            
+            # Retry with smaller batch size
+            model = whisperx.load_model(model_name, device, compute_type=compute_type, language="en")
+            audio = whisperx.load_audio(audio_path)
+            result = model.transcribe(audio, batch_size=8, language='en')
+            
+            # Align
+            model_a, metadata = whisperx.load_align_model(language_code="en", device=device)
+            result = whisperx.align(result["segments"], model_a, metadata, audio, device, return_char_alignments=False)
+        else:
+            raise
     
     # Step 2: Diarize
     print("  → Diarizing...")
@@ -378,6 +413,10 @@ def transcribe_whisperx(audio_path, output_dir, force_cpu=False):
         
         elapsed = time.time() - start
         print(f"  Completed in {elapsed:.1f}s ({elapsed/60:.1f} min)")
+        
+        # Clean up GPU memory after transcription
+        print("  → Cleaning up GPU memory...")
+        cleanup_gpu_memory(force_cpu)
         
         return output_path
         

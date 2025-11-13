@@ -13,7 +13,8 @@ from pathlib import Path
 import argparse
 
 # Import shared utilities
-from common import Colors, success, failure, skip, validate_api_key, load_people_list, load_terms_list
+from common import (Colors, success, failure, skip, validate_api_key, 
+                    load_people_list, load_terms_list, start_ollama, stop_ollama, cleanup_gpu_memory)
 
 
 # ============================================================================
@@ -351,32 +352,11 @@ def process_with_qwen(transcript, context, ollama_process=None):
     started_ollama = False
     
     try:
-        # Check if Ollama is running (either passed in or already running)
+        # Start Ollama if not running (using shared function)
         if ollama_process is None:
-            try:
-                response = requests.get("http://localhost:11434/api/tags", timeout=2)
-                if response.status_code != 200:
-                    raise Exception("Ollama not responding")
-            except:
-                print("      Starting Ollama service...")
-                ollama_process = subprocess.Popen(
-                    ['ollama', 'serve'],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
+            ollama_process = start_ollama()
+            if ollama_process is not None:
                 started_ollama = True
-                
-                # Wait for service
-                for i in range(10):
-                    time.sleep(1)
-                    try:
-                        requests.get("http://localhost:11434/api/tags", timeout=1)
-                        print("      ✓ Ollama started")
-                        break
-                    except:
-                        continue
-                else:
-                    raise Exception("Ollama failed to start")
         
         # Process transcript
         prompt = build_prompt(context, transcript)
@@ -697,16 +677,9 @@ def main():
                 print()
     
     finally:
-        # Clean up Ollama if we started it
+        # Clean up Ollama if we started it (using shared function)
         if ollama_process:
-            print("Stopping Ollama service...")
-            ollama_process.terminate()
-            try:
-                ollama_process.wait(timeout=5)
-                print("✓ Ollama stopped")
-            except:
-                ollama_process.kill()
-                print("✓ Ollama force stopped")
+            stop_ollama(ollama_process)
     
     # Summary with timing
     pipeline_elapsed = time.time() - pipeline_start

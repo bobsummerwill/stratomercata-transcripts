@@ -247,31 +247,24 @@ echo -e "${GREEN}✓ Base packages installed${NC}"
 echo ""
 
 # ==============================================================================
-# Step 5: PyTorch Upgrade
+# Step 5: PyTorch Upgrade to 2.9.0 with CUDA 13.0
 # ==============================================================================
-# Upgrades PyTorch from 2.8.0 (WhisperX default) to 2.9.0 with correct build.
+# Upgrades PyTorch from 2.8.0 (WhisperX default) to 2.9.0 with CUDA 13.0.
 # PyTorch 2.9.0 provides full Blackwell (sm_120) support for RTX 50-series GPUs.
 # CUDA 13.0 offers the latest optimizations and performance improvements.
-# Uses --force-reinstall to ensure correct CUDA/CPU variant is installed.
+# Always install CUDA build - required for GPU acceleration.
+# Uses --force-reinstall to ensure correct CUDA variant is installed.
 # ==============================================================================
-echo -e "${YELLOW}[5/14] Upgrading PyTorch to 2.9.0...${NC}"
-echo "Upgrading PyTorch 2.8.0 → 2.9.0 with correct build for detected hardware"
+echo -e "${YELLOW}[5/14] Upgrading PyTorch to 2.9.0 with CUDA 13.0...${NC}"
+echo "Upgrading PyTorch 2.8.0 → 2.9.0 with CUDA 13.0"
 echo "Provides full Blackwell (sm_120) support for RTX 50-series GPUs"
 echo "This may take 2-5 minutes depending on internet speed..."
-if [ "$HAS_NVIDIA" = true ]; then
-    echo "Installing: PyTorch 2.9.0 with CUDA 13.0 support"
-    pip install --force-reinstall --index-url https://download.pytorch.org/whl/cu130 \
-        torch==2.9.0 \
-        torchvision==0.24.0 \
-        torchaudio==2.9.0
-else
-    echo "Installing: PyTorch 2.9.0 CPU-only build"
-    pip install --force-reinstall --index-url https://download.pytorch.org/whl/cpu \
-        torch==2.9.0 \
-        torchvision==0.24.0 \
-        torchaudio==2.9.0
-fi
-echo -e "${GREEN}✓ PyTorch 2.9.0 installed${NC}"
+echo "Installing: PyTorch 2.9.0 with CUDA 13.0 support"
+pip install --force-reinstall --index-url https://download.pytorch.org/whl/cu130 \
+    torch==2.9.0 \
+    torchvision==0.24.0 \
+    torchaudio==2.9.0
+echo -e "${GREEN}✓ PyTorch 2.9.0+cu130 installed${NC}"
 echo ""
 
 # ==============================================================================
