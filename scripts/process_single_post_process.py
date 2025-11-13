@@ -1,10 +1,8 @@
 #!/usr/bin/env python3
 """
-Multi-provider AI transcript post-processor for Ethereum/blockchain content
-Supports: Sonnet (Claude Sonnet 4.5), ChatGPT (chatgpt-4o-latest), Gemini (Google), Llama (Llama 3.3 70B via Groq), DeepSeek, Kimi K2 (Moonshot via Novita), Qwen3Max (via Novita), Qwen (local via Ollama)
-Uses domain context to correct technical terms and speaker names
-
-Now supports batch processing of multiple transcripts × processors internally
+AI transcript post-processor for Ethereum/blockchain content.
+Supports: sonnet, chatgpt, gemini, llama, kimi, qwen3max, deepseek, qwen.
+Batch processes multiple transcripts × processors.
 """
 
 import os
@@ -36,16 +34,7 @@ def skip(msg):
 # ============================================================================
 
 def validate_api_key(env_var):
-    """
-    Check if API key environment variable is set.
-    
-    Args:
-        env_var: Name of environment variable to check
-    
-    Returns:
-        Tuple of (key, error_message). If key exists, error_message is None.
-        If key missing, key is None and error_message describes the issue.
-    """
+    """Check if API key environment variable is set. Returns (key, error_message)."""
     key = os.environ.get(env_var, '').strip()
     if not key:
         return None, f"{env_var} not set"
@@ -53,15 +42,7 @@ def validate_api_key(env_var):
 
 
 def extract_transcriber_from_filename(filepath):
-    """
-    Extract transcriber name from intermediate filename.
-    
-    Args:
-        filepath: Path to intermediate transcript file
-    
-    Returns:
-        Tuple of (basename, transcriber_name) or (basename, None) if not found
-    """
+    """Extract transcriber name from intermediate filename."""
     filename = Path(filepath).stem
     
     for service in ['whisperx', 'assemblyai', 'deepgram', 'sonix', 'speechmatics', 'openai']:
@@ -74,21 +55,7 @@ def extract_transcriber_from_filename(filepath):
 
 
 def save_processed_files(output_dir, basename, transcriber, processor, content):
-    """
-    Save processed transcript in both txt and md formats with consistent naming.
-    TXT format: No timestamps (clean text only)
-    MD format: With timestamps for reference
-    
-    Args:
-        output_dir: Directory to save files  
-        basename: Base filename without extension
-        transcriber: Name of transcription service used
-        processor: Name of AI processor used
-        content: Processed transcript content
-    
-    Returns:
-        Path object for the .txt file
-    """
+    """Save processed transcript in txt (no timestamps) and md (with timestamps) formats."""
     import re
     
     output_path = Path(output_dir) / f"{basename}_{transcriber}_{processor}_processed.txt"
@@ -147,11 +114,11 @@ Important: Only make changes where you are confident. If unsure about a speaker'
 Output the corrected transcript maintaining the exact same format structure."""
 
 def build_prompt(context, transcript):
-    """Build the complete prompt from template"""
+    """Build complete prompt from template."""
     return INSTRUCTION_TEMPLATE.format(context=context, transcript=transcript)
 
 def load_glossary():
-    """Load ethereum_glossary.json if available"""
+    """Load ethereum_glossary.json if available."""
     glossary_file = Path("ethereum_glossary.json")
     
     if glossary_file.exists():
@@ -166,7 +133,7 @@ def load_glossary():
     }
 
 def load_people_list():
-    """Load ethereum_people.txt, generating it if needed"""
+    """Load ethereum_people.txt, generating if needed."""
     people_file = Path("intermediates/ethereum_people.txt")
     
     # Generate if doesn't exist
@@ -189,7 +156,7 @@ def load_people_list():
     return []
 
 def load_terms_list():
-    """Load ethereum_technical_terms.txt, generating it if needed"""
+    """Load ethereum_technical_terms.txt, generating if needed."""
     terms_file = Path("intermediates/ethereum_technical_terms.txt")
     
     # Generate if doesn't exist
@@ -212,7 +179,7 @@ def load_terms_list():
     return []
 
 def build_context_summary():
-    """Build a concise context summary from available resources"""
+    """Build context summary from available resources."""
     import subprocess
     
     context_parts = []
@@ -264,7 +231,7 @@ def build_context_summary():
     return "\n\n".join(context_parts) if context_parts else "No additional context available."
 
 def process_with_anthropic(transcript, api_key, context):
-    """Process transcript using Anthropic Claude Sonnet 4.5 with streaming"""
+    """Process transcript using Claude Sonnet 4.5 with streaming."""
     try:
         import anthropic
     except ImportError:
@@ -279,9 +246,6 @@ def process_with_anthropic(transcript, api_key, context):
     result = ""
     chunk_count = 0
     
-    # Using Claude Sonnet 4.5 (auto-updates to latest version)
-    # Top-tier intelligence for coding, agents, and complex reasoning
-    # Best balance of capability/cost/speed for transcript post-processing
     with client.messages.stream(
         model="claude-sonnet-4-5",
         max_tokens=64000,
@@ -297,7 +261,7 @@ def process_with_anthropic(transcript, api_key, context):
     return result
 
 def process_with_openai(transcript, api_key, context):
-    """Process transcript using OpenAI chatgpt-4o-latest with streaming"""
+    """Process transcript using ChatGPT-4o-latest with streaming."""
     model = "chatgpt-4o-latest"
     try:
         import openai
@@ -334,7 +298,7 @@ def process_with_openai(transcript, api_key, context):
     return result
 
 def process_with_gemini(transcript, api_key, context):
-    """Process transcript using Google Gemini 2.5 Pro with streaming"""
+    """Process transcript using Gemini 2.5 Pro with streaming."""
     model = "gemini-2.5-pro"
     try:
         import google.generativeai as genai
@@ -364,11 +328,7 @@ def process_with_gemini(transcript, api_key, context):
     return result
 
 def process_with_groq(transcript, api_key, context):
-    """Process transcript using Groq Llama 3.3 70B with streaming
-    
-    Uses llama-3.3-70b-versatile - Meta's latest and most capable Llama model
-    Extremely fast inference (300+ tokens/sec) with excellent text processing
-    """
+    """Process transcript using Llama 3.3 70B (via Groq) with streaming."""
     model = "llama-3.3-70b-versatile"
     try:
         import openai
@@ -407,7 +367,7 @@ def process_with_groq(transcript, api_key, context):
     return result
 
 def process_with_deepseek(transcript, api_key, context):
-    """Process transcript using DeepSeek Chat with streaming"""
+    """Process transcript using DeepSeek Chat with streaming."""
     model = "deepseek-chat"
     try:
         import openai
@@ -444,11 +404,7 @@ def process_with_deepseek(transcript, api_key, context):
     return result
 
 def process_with_qwen3max(transcript, api_key, context):
-    """Process transcript using Alibaba Qwen 3 Max model (via Novita AI) with streaming
-    
-    Uses qwen/qwen3-max - flagship Qwen model with strong reasoning capabilities
-    Excellent for complex technical content requiring deep understanding
-    """
+    """Process transcript using Qwen 3 Max (via Novita) with streaming."""
     model = "qwen/qwen3-max"
     try:
         import openai
@@ -487,11 +443,7 @@ def process_with_qwen3max(transcript, api_key, context):
     return result
 
 def process_with_kimi(transcript, api_key, context):
-    """Process transcript using Moonshot Kimi K2 Thinking model (via Novita AI) with streaming
-    
-    Uses moonshotai/kimi-k2-thinking - advanced reasoning model with massive context window
-    Excellent for long transcripts with complex technical content and reasoning tasks
-    """
+    """Process transcript using Kimi K2 (via Novita) with streaming."""
     model = "moonshotai/kimi-k2-thinking"
     try:
         import openai
@@ -530,15 +482,11 @@ def process_with_kimi(transcript, api_key, context):
     return result
 
 def estimate_tokens(text):
-    """Rough token estimation (words * 1.3)"""
+    """Estimate tokens (words × 1.3)."""
     return int(len(text.split()) * 1.3)
 
 def process_with_qwen(transcript, context, ollama_process=None):
-    """Process transcript using Qwen 2.5 7B (via Ollama) - reuses existing process if provided
-    
-    Note: Qwen2.5-7B has a 32K token context limit. Typical transcripts (60-90 min) need ~45K tokens.
-    For longer transcripts, consider using cloud providers (Gemini, OpenAI, DeepSeek, Anthropic).
-    """
+    """Process transcript using Qwen 2.5 7B (via Ollama). 32K token limit."""
     import subprocess
     import time
     
@@ -661,7 +609,7 @@ def process_with_qwen(transcript, context, ollama_process=None):
         return None, None
 
 def process_single_combination(transcript_path, provider, api_keys, context, ollama_process=None):
-    """Process a single transcript with a single provider"""
+    """Process single transcript with single provider."""
     start_time = time.time()
     
     # Load transcript
