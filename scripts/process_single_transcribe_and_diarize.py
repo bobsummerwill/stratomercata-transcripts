@@ -137,6 +137,25 @@ def save_raw_transcript_from_text(output_dir, basename, service_name, formatted_
     return output_path
 
 
+def load_custom_vocabulary():
+    """Load Ethereum-specific vocabulary from files for transcription services."""
+    vocab = []
+    
+    # Load technical terms
+    terms_file = Path("intermediates/ethereum_technical_terms.txt")
+    if terms_file.exists():
+        with open(terms_file, 'r', encoding='utf-8') as f:
+            vocab.extend([line.strip() for line in f if line.strip()])
+    
+    # Load people names
+    people_file = Path("intermediates/ethereum_people.txt")
+    if people_file.exists():
+        with open(people_file, 'r', encoding='utf-8') as f:
+            vocab.extend([line.strip() for line in f if line.strip()])
+    
+    return vocab
+
+
 # ============================================================================
 # Main Entry Point
 # ============================================================================
@@ -446,6 +465,10 @@ def transcribe_deepgram(audio_path, output_dir):
     
     start_time = time.time()
     
+    # Load custom vocabulary (people names + technical terms)
+    custom_vocab = load_custom_vocabulary()
+    print(f"  Loaded {len(custom_vocab)} custom terms")
+    
     # Model: nova-3-general (updated 2025-11-10)
     # Best accuracy for multi-speaker conversations and technical content
     # utterances=True: Returns transcript organized by speaker turns (continuous speech segments)
@@ -460,13 +483,9 @@ def transcribe_deepgram(audio_path, output_dir):
         paragraphs=True,
         utterances=True,  # Returns speaker turns (see comment above)
         filler_words=False,  # Don't include filler words in transcript
-        # Nova-3 uses 'keyterm' not 'keywords' - boost blockchain/crypto term accuracy
-        keyterm=[
-            "Ethereum", "Bitcoin", "blockchain", "cryptocurrency", "smart contract",
-            "DeFi", "NFT", "token", "wallet", "consensus", "proof of stake",
-            "proof of work", "mining", "validator", "gas", "gwei", "wei",
-            "Solidity", "EVM", "dApp", "Web3", "MetaMask", "staking"
-        ],
+        # Boost accuracy for Ethereum people/terms from vocabulary files
+        # Deepgram may limit array size, using first 100 items
+        keyterm=custom_vocab[:100],
     )
     
     elapsed = time.time() - start_time
@@ -531,6 +550,10 @@ def transcribe_assemblyai(audio_path, output_dir):
     aai.settings.api_key = api_key
     audio_file_path = Path(audio_path)
     
+    # Load custom vocabulary (people names + technical terms)
+    custom_vocab = load_custom_vocabulary()
+    print(f"  Loaded {len(custom_vocab)} custom terms")
+    
     print(f"  Uploading and transcribing...")
     
     config = aai.TranscriptionConfig(
@@ -538,7 +561,9 @@ def transcribe_assemblyai(audio_path, output_dir):
         speakers_expected=None,
         format_text=True,  # Auto-format for readability
         punctuate=True,
-        disfluencies=False  # Remove filler words (um, uh, etc.)
+        disfluencies=False,  # Remove filler words (um, uh, etc.)
+        word_boost=custom_vocab,  # Boost accuracy for Ethereum people/terms
+        boost_param='high'  # Aggressively boost custom vocabulary
     )
     
     transcriber = aai.Transcriber()
@@ -588,6 +613,10 @@ def transcribe_revai(audio_path, output_dir):
     print(f"  Model: Rev.ai v3 Human")
     print(f"  Uploading and transcribing...")
     
+    # Load custom vocabulary (people names + technical terms)
+    custom_vocab = load_custom_vocabulary()
+    print(f"  Loaded {len(custom_vocab)} custom terms")
+    
     # Submit job with speaker diarization
     headers = {'Authorization': f'Bearer {api_key}'}
     
@@ -601,12 +630,7 @@ def transcribe_revai(audio_path, output_dir):
                 'filter_profanity': False,
                 'custom_vocabularies': [
                     {
-                        'phrases': [
-                            'Ethereum', 'blockchain', 'cryptocurrency', 'Bitcoin',
-                            'DeFi', 'NFT', 'smart contract', 'dApp', 'Web3',
-                            'Solidity', 'EVM', 'proof-of-stake', 'proof-of-work',
-                            'MetaMask', 'validator', 'gas', 'gwei', 'staking'
-                        ]
+                        'phrases': custom_vocab  # Use full vocabulary from files
                     }
                 ]
             })
@@ -695,6 +719,10 @@ def transcribe_sonix(audio_path, output_dir):
     
     audio_file_path = Path(audio_path)
     
+    # Load custom vocabulary (people names + technical terms)
+    custom_vocab = load_custom_vocabulary()
+    print(f"  Loaded {len(custom_vocab)} custom terms")
+    
     print(f"  Uploading to Sonix with enhanced parameters...")
     print(f"    - Speaker identification enabled")
     print(f"    - Custom blockchain/crypto vocabulary")
@@ -713,17 +741,7 @@ def transcribe_sonix(audio_path, output_dir):
             'enable_entity_detection': 'true',
             'enable_auto_punctuation': 'true',
             'profanity_filter': 'false',
-            'custom_vocab': ','.join([
-                'Ethereum', 'blockchain', 'cryptocurrency', 'Bitcoin',
-                'DeFi', 'NFT', 'smart contract', 'dApp', 'Web3',
-                'Solidity', 'EVM', 'Geth', 'Whisper', 'Swarm', 'Mist',
-                'proof-of-stake', 'proof-of-work', 'consensus',
-                'validator', 'mining', 'gas', 'gwei', 'wei',
-                'MetaMask', 'wallet', 'token', 'DAO', 'IPFS',
-                'ENS', 'layer-2', 'rollup', 'sharding', 'staking',
-                'DevCon', 'EthCC', 'testnet', 'mainnet', 'fork',
-                'PyEthereum', 'cpp-ethereum', 'go-ethereum'
-            ])
+            'custom_vocab': ','.join(custom_vocab)  # Use full vocabulary from files
         }
         
         response = requests.post(
