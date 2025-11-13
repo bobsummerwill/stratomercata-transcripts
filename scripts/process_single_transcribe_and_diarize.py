@@ -459,7 +459,7 @@ def transcribe_deepgram(audio_path, output_dir):
         punctuate=True,
         paragraphs=True,
         utterances=True,  # Returns speaker turns (see comment above)
-        filler_words=True,  # Detect filler words (um, uh, ah, etc.)
+        filler_words=False,  # Don't include filler words in transcript
         # Nova-3 uses 'keyterm' not 'keywords' - boost blockchain/crypto term accuracy
         keyterm=[
             "Ethereum", "Bitcoin", "blockchain", "cryptocurrency", "smart contract",
@@ -535,7 +535,10 @@ def transcribe_assemblyai(audio_path, output_dir):
     
     config = aai.TranscriptionConfig(
         speaker_labels=True,
-        speakers_expected=None
+        speakers_expected=None,
+        format_text=True,  # Auto-format for readability
+        punctuate=True,
+        disfluencies=False  # Remove filler words (um, uh, etc.)
     )
     
     transcriber = aai.Transcriber()
@@ -594,7 +597,7 @@ def transcribe_revai(audio_path, output_dir):
             'options': json.dumps({
                 'language': 'en',
                 'speaker_channels_count': None,  # Auto-detect speakers
-                'remove_disfluencies': False,
+                'remove_disfluencies': True,  # Remove filler words (um, uh, etc.)
                 'filter_profanity': False,
                 'custom_vocabularies': [
                     {
@@ -852,7 +855,11 @@ def transcribe_speechmatics(audio_path, output_dir):
         "transcription_config": {
             "language": "en",
             "diarization": "speaker",
-            "operating_point": "enhanced"
+            "operating_point": "enhanced",
+            "enable_entities": True,
+            "punctuation_overrides": {
+                "permitted_marks": [".", "?", "!"]
+            }
         }
     }
     
