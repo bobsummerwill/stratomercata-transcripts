@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
 AI transcript post-processor for Ethereum/blockchain content.
+Batch process transcripts with multiple AI providers.
 Supports: sonnet, chatgpt, gemini, llama, qwen.
-Batch processes multiple transcripts × processors.
 """
 
 import os
@@ -34,7 +34,7 @@ def skip(msg):
 # ============================================================================
 
 def validate_api_key(env_var):
-    """Check if API key environment variable is set. Returns (key, error_message)."""
+    """Validate API key. Returns (key, error_msg)."""
     key = os.environ.get(env_var, '').strip()
     if not key:
         return None, f"{env_var} not set"
@@ -42,7 +42,7 @@ def validate_api_key(env_var):
 
 
 def extract_transcriber_from_filename(filepath):
-    """Extract transcriber name from intermediate filename."""
+    """Parse transcriber name from intermediate filename."""
     filename = Path(filepath).stem
     
     for service in ['whisperx', 'assemblyai', 'deepgram', 'openai']:
@@ -50,12 +50,11 @@ def extract_transcriber_from_filename(filepath):
             basename = filename.replace(f'_{service}_raw', '')
             return basename, service
     
-    # Fallback if no match
     return filename, "whisperx"
 
 
 def save_processed_files(output_dir, basename, transcriber, processor, content):
-    """Save processed transcript in txt (no timestamps) and md (with timestamps) formats."""
+    """Save txt (clean) and md (with timestamps)."""
     import re
     
     output_path = Path(output_dir) / f"{basename}_{transcriber}_{processor}_processed.txt"
@@ -103,11 +102,11 @@ Your tasks:
 1. Fix technical term spellings and capitalization (e.g., "etherium" → "Ethereum", "nfts" → "NFTs")
 2. Correct proper names using the people list provided
 3. Fix blockchain concept terminology to match standard usage
-4. Identify and replace generic speaker labels (SPEAKER_01, SPEAKER_02, etc.).  Do not add actual names.  Start at 01.
+4. Use generic labels SPEAKER_01, SPEAKER_02, etc. (do not add actual names)
 5. Improve punctuation and sentence structure for readability
 6. Add paragraph breaks at natural conversation transitions
 7. **CRITICAL: PRESERVE ALL TIMESTAMPS**
-8. Maintain the speaker label format (lines starting with speaker name followed by colon)
+8. Maintain speaker label format (speaker name followed by colon)
 
 **TIMESTAMP FORMAT REQUIREMENT (MANDATORY):**
 Every line of dialogue MUST retain its timestamp in [XX.Xs] format at the start of the line.

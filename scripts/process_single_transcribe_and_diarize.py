@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Unified transcription script with speaker diarization
-Supports multiple providers: WhisperX (local), Deepgram, AssemblyAI
-All providers include speaker diarization support.
+Unified transcription with speaker diarization.
+Supports: WhisperX (local), Deepgram, AssemblyAI.
 """
 
 import sys
