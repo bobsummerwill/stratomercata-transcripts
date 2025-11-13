@@ -89,23 +89,31 @@ Your tasks:
 8. Maintain speaker label format (speaker name followed by colon)
 
 **TIMESTAMP FORMAT REQUIREMENT (MANDATORY):**
-Every line of dialogue MUST retain its timestamp in [XX.Xs] format at the start of the line.
+Every line of dialogue MUST retain its timestamp in [MM:SS] format at the start of the line.
 
-CORRECT FORMAT EXAMPLE:
+Format specifications:
+- Use minutes:seconds format: [MM:SS]
+- Always use 2 digits for both minutes and seconds (e.g., 00:05, 02:12, 15:47)
+- No decimal fractions - round to nearest second
+- First minute should be 00 (e.g., [00:15] for 15 seconds)
+
+CORRECT FORMAT EXAMPLES:
 ```
 **SPEAKER_01:**
-[1.8s] Okay, welcome everyone.
-[3.4s] We have a very special topic today.
+[00:01] Okay, welcome everyone.
+[00:03] We have a very special topic today.
+[02:12] Let me explain the technical details.
 ```
 
-INCORRECT FORMAT (DO NOT DO THIS):
+INCORRECT FORMATS (DO NOT USE):
 ```
 **SPEAKER_01:**
-Okay, welcome everyone.
-We have a very special topic today.
+[1.8s] Wrong - no decimal fractions allowed
+[132.2s] Wrong - must use MM:SS format
+Okay, welcome everyone. Wrong - missing timestamp entirely
 ```
 
-The timestamps [XX.Xs] are REQUIRED and must appear at the beginning of every text line. This is non-negotiable.
+The timestamps [MM:SS] are REQUIRED and must appear at the beginning of every text line. This is non-negotiable.
 
 Important: 
 - Only make changes where you are confident
