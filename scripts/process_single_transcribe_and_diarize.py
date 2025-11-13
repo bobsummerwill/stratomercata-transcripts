@@ -352,7 +352,7 @@ def transcribe_whisperx(audio_path, output_dir, force_cpu=False):
     
     model_name = "large-v3"
     compute_type = "float16" if device == "cuda" else "int8"
-    batch_size = 16 if device == "cuda" else 8
+    batch_size = 32 if device == "cuda" else 8  # Optimized for 12GB+ GPUs like RTX 5070
     
     print(f"  Device: {device}")
     print(f"  Model: {model_name}")

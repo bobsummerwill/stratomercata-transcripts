@@ -184,17 +184,18 @@ if command -v ollama &> /dev/null; then
         echo "✓ Ollama service already running"
     fi
     
-    echo "Pulling Ollama model for Gwen (qwen2.5:7b - optimized for 12GB GPU)..."
-    echo "This will download ~4.7GB - may take several minutes depending on your internet speed..."
-    if ollama pull qwen2.5:7b 2>&1 | grep -q "success"; then
-        echo -e "${GREEN}✓ Model qwen2.5:7b downloaded and ready for Gwen${NC}"
+    echo "Pulling Ollama model for qwen (qwen2.5:32b - optimized for 12GB+ GPU)..."
+    echo "This will download ~19GB - may take 10-20 minutes depending on your internet speed..."
+    if ollama pull qwen2.5:32b 2>&1 | grep -q "success"; then
+        echo -e "${GREEN}✓ Model qwen2.5:32b downloaded and ready for local post-processing${NC}"
     else
         # Try anyway, sometimes it succeeds but doesn't output "success"
         echo -e "${YELLOW}⚠ Model pull completed (check with: ollama list)${NC}"
     fi
-    echo "Note: You can also install larger models if you have more VRAM:"
-    echo "  ollama pull qwen2.5:14b  # ~8.5GB model, needs 16GB+ VRAM"
-    echo "  ollama pull qwen2.5:32b  # ~20GB model, needs 24GB+ VRAM"
+    echo "Note: This 32B model provides much better quality than the old 7B default"
+    echo "  Uses ~8-9GB VRAM (fits comfortably on 12GB GPUs like RTX 5070)"
+    echo "  For smaller GPUs (8GB), you can switch to 7B: ollama pull qwen2.5:7b"
+    echo "  For larger GPUs (24GB+), consider 70B: ollama pull qwen2.5:72b"
 fi
 echo ""
 

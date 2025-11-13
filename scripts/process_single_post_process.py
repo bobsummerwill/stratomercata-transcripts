@@ -240,7 +240,6 @@ def process_with_anthropic(transcript, api_key, context):
     client = anthropic.Anthropic(api_key=api_key)
     prompt = build_prompt(context, transcript)
     
-    print(f"      Transcript size: {len(transcript)} chars")
     print(f"      Processing: ", end='', flush=True)
     
     result = ""
@@ -271,7 +270,6 @@ def process_with_openai(transcript, api_key, context):
     client = openai.OpenAI(api_key=api_key)
     prompt = build_prompt(context, transcript)
     
-    print(f"      Transcript size: {len(transcript)} chars")
     print(f"      Processing: ", end='', flush=True)
     
     result = ""
@@ -308,7 +306,6 @@ def process_with_gemini(transcript, api_key, context):
     genai.configure(api_key=api_key)
     prompt = build_prompt(context, transcript)
     
-    print(f"      Transcript size: {len(transcript)} chars")
     print(f"      Processing: ", end='', flush=True)
     
     model_instance = genai.GenerativeModel(model)
@@ -338,7 +335,6 @@ def process_with_groq(transcript, api_key, context):
     client = openai.OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
     prompt = build_prompt(context, transcript)
     
-    print(f"      Transcript size: {len(transcript)} chars")
     print(f"      Model: {model}")
     print(f"      Processing: ", end='', flush=True)
     
@@ -377,7 +373,6 @@ def process_with_deepseek(transcript, api_key, context):
     client = openai.OpenAI(api_key=api_key, base_url="https://api.deepseek.com")
     prompt = build_prompt(context, transcript)
     
-    print(f"      Transcript size: {len(transcript)} chars")
     print(f"      Processing: ", end='', flush=True)
     
     result = ""
@@ -414,7 +409,6 @@ def process_with_qwen3max(transcript, api_key, context):
     client = openai.OpenAI(api_key=api_key, base_url="https://api.novita.ai/openai/v1")
     prompt = build_prompt(context, transcript)
     
-    print(f"      Transcript size: {len(transcript)} chars")
     print(f"      Model: {model}")
     print(f"      Processing: ", end='', flush=True)
     
@@ -433,17 +427,20 @@ def process_with_qwen3max(transcript, api_key, context):
     )
     
     for chunk in stream:
-        if chunk.choices[0].delta.content:
-            result += chunk.choices[0].delta.content
-            chunk_count += 1
-            if chunk_count % 100 == 0:
-                print(".", end='', flush=True)
+        # Some chunks have empty choices[] array from Novita API, check before accessing
+        if chunk.choices and len(chunk.choices) > 0:
+            if chunk.choices[0].delta.content:
+                result += chunk.choices[0].delta.content
+                chunk_count += 1
+                if chunk_count % 100 == 0:
+                    print(".", end='', flush=True)
     
     print(" ✓")
     return result
 
 def process_with_kimi(transcript, api_key, context):
     """Process transcript using Kimi K2 (via Novita) with streaming."""
+    import time as time_module
     model = "moonshotai/kimi-k2-thinking"
     try:
         import openai
@@ -453,12 +450,12 @@ def process_with_kimi(transcript, api_key, context):
     client = openai.OpenAI(api_key=api_key, base_url="https://api.novita.ai/openai/v1")
     prompt = build_prompt(context, transcript)
     
-    print(f"      Transcript size: {len(transcript)} chars")
     print(f"      Model: {model}")
     print(f"      Processing: ", end='', flush=True)
     
     result = ""
     chunk_count = 0
+    last_progress_time = time_module.time()
     
     stream = client.chat.completions.create(
         model=model,
@@ -472,11 +469,32 @@ def process_with_kimi(transcript, api_key, context):
     )
     
     for chunk in stream:
-        if chunk.choices[0].delta.content:
-            result += chunk.choices[0].delta.content
-            chunk_count += 1
-            if chunk_count % 100 == 0:
-                print(".", end='', flush=True)
+        # Kimi K2 is a reasoning model - may have long thinking pauses
+        # Show progress dots even during thinking phase (every 30 seconds)
+        current_time = time_module.time()
+        if current_time - last_progress_time > 30:
+            print(".", end='', flush=True)
+            last_progress_time = current_time
+        
+        # Some chunks have empty choices[] array, so check before accessing
+        if chunk.choices and len(chunk.choices) > 0:
+            delta = chunk.choices[0].delta
+            
+            # Check for both regular content and reasoning content
+            if hasattr(delta, 'content') and delta.content:
+                result += delta.content
+                chunk_count += 1
+                if chunk_count % 100 == 0:
+                    print(".", end='', flush=True)
+                    last_progress_time = current_time
+            
+            # Reasoning models may also emit reasoning_content (though we don't save it)
+            # But we can use it to show progress
+            elif hasattr(delta, 'reasoning_content') and delta.reasoning_content:
+                # Don't add to result, but show we're making progress
+                if current_time - last_progress_time > 10:
+                    print(".", end='', flush=True)
+                    last_progress_time = current_time
     
     print(" ✓")
     return result
@@ -486,7 +504,7 @@ def estimate_tokens(text):
     return int(len(text.split()) * 1.3)
 
 def process_with_qwen(transcript, context, ollama_process=None):
-    """Process transcript using Qwen 2.5 7B (via Ollama). 32K token limit."""
+    """Process transcript using Qwen 2.5 32B (via Ollama). 32K token limit."""
     import subprocess
     import time
     
@@ -496,7 +514,7 @@ def process_with_qwen(transcript, context, ollama_process=None):
     except ImportError:
         raise ImportError("requests package not installed")
     
-    model = "qwen2.5:7b"
+    model = "qwen2.5:32b"
     started_ollama = False
     
     try:
@@ -659,6 +677,7 @@ def process_single_combination(transcript_path, provider, api_keys, context, oll
     
     if not corrected:
         elapsed = time.time() - start_time
+        print(f"      {failure(f'Processing failed ({elapsed:.1f}s): No output generated')}")
         
         # Clean up any partial files
         for partial_file in [output_txt, output_md]:
