@@ -9,6 +9,10 @@
 
 set -e
 
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/shell_utils.sh"
+
 # Defaults: WhisperX (local/FREE) + GPT-4o (ChatGPT-5, highest quality)
 DEFAULT_TRANSCRIBERS="whisperx"
 DEFAULT_PROCESSORS="openai"
@@ -56,13 +60,6 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-NC='\033[0m'
-
 # Directories
 PROJECT_DIR="/home/zombietiger/Projects/stratomercata-transcripts"
 DOWNLOADS_DIR="/home/zombietiger/Downloads"
@@ -96,22 +93,6 @@ fi
 
 echo -e "${GREEN}Found $TOTAL MP3 files to process${NC}"
 echo ""
-
-# Timing function
-format_duration() {
-    local seconds=$1
-    local hours=$((seconds / 3600))
-    local minutes=$(((seconds % 3600) / 60))
-    local secs=$((seconds % 60))
-    
-    if [ $hours -gt 0 ]; then
-        printf "%dh %dm %ds" $hours $minutes $secs
-    elif [ $minutes -gt 0 ]; then
-        printf "%dm %ds" $minutes $secs
-    else
-        printf "%ds" $secs
-    fi
-}
 
 # Timing arrays
 declare -a FILE_NAMES

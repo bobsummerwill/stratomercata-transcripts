@@ -7,6 +7,10 @@
 
 set -e
 
+# Source shared utilities
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$SCRIPT_DIR/shell_utils.sh"
+
 # Check if audio file provided
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <audio_file> --transcribers <t1,t2,...> --processors <p1,p2,...> [options]"
@@ -71,22 +75,6 @@ if [ ! -f "$AUDIO_FILE" ]; then
     echo "Error: Audio file not found: $AUDIO_FILE"
     exit 1
 fi
-
-# Timing function
-format_duration() {
-    local seconds=$1
-    local hours=$((seconds / 3600))
-    local minutes=$(((seconds % 3600) / 60))
-    local secs=$((seconds % 60))
-    
-    if [ $hours -gt 0 ]; then
-        printf "%dh %dm %ds" $hours $minutes $secs
-    elif [ $minutes -gt 0 ]; then
-        printf "%dm %ds" $minutes $secs
-    else
-        printf "%ds" $secs
-    fi
-}
 
 # Start overall timing
 PIPELINE_START=$(date +%s)
