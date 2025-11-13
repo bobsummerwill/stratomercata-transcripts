@@ -624,6 +624,43 @@ def main():
             print(f"Valid options: {', '.join(sorted(valid_processors))}")
             sys.exit(1)
     
+    # Check if Qwen requested on CPU-only system
+    if 'qwen' in processors:
+        try:
+            import torch
+            has_gpu = torch.cuda.is_available()
+            
+            if not has_gpu:
+                # CPU-only system - skip Qwen with warning
+                print()
+                print(f"{Colors.YELLOW}⚠️  QWEN SKIPPED: GPU Required{Colors.RESET}")
+                print()
+                print("Qwen requires NVIDIA GPU with 12GB+ VRAM for transcript processing.")
+                print("Current system: CPU-only")
+                print()
+                print("• Qwen 7B (CPU) is insufficient for complex transcript editing tasks")
+                print("• Qwen 32B (GPU) would work excellently on RTX 5070 12GB or similar")
+                print()
+                print("Skipping Qwen processing - all other processors will continue normally.")
+                print()
+                
+                # Remove qwen from processors list
+                processors = [p for p in processors if p != 'qwen']
+                
+                if not processors:
+                    print("Error: No processors remaining after skipping Qwen")
+                    sys.exit(1)
+        except ImportError:
+            # If torch not available, can't use Qwen anyway
+            print()
+            print(f"{Colors.YELLOW}⚠️  QWEN SKIPPED: PyTorch not available{Colors.RESET}")
+            print()
+            processors = [p for p in processors if p != 'qwen']
+            
+            if not processors:
+                print("Error: No processors remaining after skipping Qwen")
+                sys.exit(1)
+    
     # Check API keys using utility
     api_keys = {}
     skip_processors = []
