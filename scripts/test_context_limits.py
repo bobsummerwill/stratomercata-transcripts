@@ -317,7 +317,7 @@ def test_gemini_context(test_sizes=[10000, 50000, 100000, 120000, 128000]):
 
 
 def test_qwen_context(test_sizes=[2000, 8000, 16000, 24000, 32000]):
-    """Test Qwen (Qwen2.5 via Ollama) context limits with hardware-adaptive model selection"""
+    """Test Qwen 32B (GPU-only via Ollama) context limits"""
     import subprocess
     import time
     
@@ -326,23 +326,25 @@ def test_qwen_context(test_sizes=[2000, 8000, 16000, 24000, 32000]):
     except ImportError:
         return {"error": "requests package not installed", "status": "skip"}
     
-    # Auto-select model based on hardware
+    # Check for GPU
     try:
         import torch
         has_gpu = torch.cuda.is_available()
-        if has_gpu:
-            gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-            use_32b = gpu_memory_gb >= 12
-        else:
-            use_32b = False
     except:
-        use_32b = False
+        has_gpu = False
     
-    model = "qwen2.5:32b" if use_32b else "qwen2.5:7b"
-    model_size = "32B (GPU)" if use_32b else "7B (CPU)"
+    if not has_gpu:
+        return {
+            "provider": "Qwen",
+            "model": "qwen2.5:32b",
+            "error": "GPU Required - Qwen skipped on CPU-only system",
+            "status": "skip"
+        }
+    
+    model = "qwen2.5:32b"
     
     print_info(f"Testing Qwen ({model} via Ollama)...")
-    print_info(f"Auto-selected: {model_size}")
+    print_info("GPU detected - using 32B model")
     
     results = {
         "provider": "Qwen",

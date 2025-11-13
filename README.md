@@ -39,7 +39,7 @@ All services include speaker diarization (identifying who said what).
 | **chatgpt** | ChatGPT-4o-latest | OpenAI | 128K | $2.50/$10 per MTok | Latest flagship model, best text processing |
 | **gemini** | Gemini 2.5 Pro | Google | 128K | ~$1.25 per MTok | Very long transcripts, multilingual |
 | **llama** | Llama 3.3 70B | Groq | 128K | $0.59/$0.79 per MTok | ⚡ BLAZING FAST (300+ tok/s), Meta's latest |
-| **qwen** | Qwen2.5:32b | Ollama (local) | 32K | FREE | Local, private, 12GB GPU |
+| **qwen** | Qwen2.5:32b | Ollama (local) | 32K | FREE | 🎮 GPU-only (12GB+ VRAM), skipped on CPU |
 
 ## Setup
 

@@ -89,29 +89,31 @@ def test_anthropic():
         return False
 
 def test_qwen():
-    """Test Qwen (Qwen2.5 via Ollama) with hardware-adaptive model selection"""
+    """Test Qwen 32B (GPU-only via Ollama)"""
     import subprocess
     import time
     
-    # Auto-select model based on hardware
+    # Check for GPU
     try:
         import torch
         has_gpu = torch.cuda.is_available()
-        if has_gpu:
-            gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-            use_32b = gpu_memory_gb >= 12
-        else:
-            use_32b = False
     except:
-        use_32b = False
-    
-    model = "qwen2.5:32b" if use_32b else "qwen2.5:7b"
-    model_size = "32B (GPU)" if use_32b else "7B (CPU)"
+        has_gpu = False
     
     print("\n" + "="*60)
-    print(f"Testing QWEN ({model} via Ollama)")
+    print("Testing QWEN (qwen2.5:32b via Ollama)")
     print("="*60)
-    print(f"Auto-selected: {model_size}")
+    
+    if not has_gpu:
+        print("⚠️  QWEN SKIPPED: GPU Required")
+        print()
+        print("Qwen requires NVIDIA GPU with 12GB+ VRAM for transcript processing.")
+        print("Current system: CPU-only")
+        print()
+        return "skipped"
+    
+    model = "qwen2.5:32b"
+    print(f"GPU detected - using {model}")
     
     ollama_process = None
     started_ollama = False

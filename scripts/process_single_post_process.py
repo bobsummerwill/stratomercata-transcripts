@@ -367,7 +367,11 @@ def estimate_tokens(text):
     return int(len(text.split()) * 1.3)
 
 def process_with_qwen(transcript, context, ollama_process=None):
-    """Process transcript using Qwen 2.5 (via Ollama) with hardware-adaptive model selection."""
+    """Process transcript using Qwen 2.5 32B (via Ollama).
+    
+    NOTE: This function should only be called on GPU systems.
+    CPU-only systems are filtered out in main() with a warning.
+    """
     import subprocess
     import time
     
@@ -377,22 +381,9 @@ def process_with_qwen(transcript, context, ollama_process=None):
     except ImportError:
         raise ImportError("requests package not installed")
     
-    # Auto-select model based on hardware
-    try:
-        import torch
-        has_gpu = torch.cuda.is_available()
-        if has_gpu:
-            # Check VRAM - need 12GB+ for 32B model
-            gpu_memory_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
-            use_32b = gpu_memory_gb >= 12
-        else:
-            use_32b = False
-    except:
-        use_32b = False  # Default to 7B if torch unavailable
-    
-    model = "qwen2.5:32b" if use_32b else "qwen2.5:7b"
-    model_size = "32B (GPU)" if use_32b else "7B (CPU)"
-    print(f"      Auto-selected: {model_size}")
+    # Use 32B model (GPU-only)
+    model = "qwen2.5:32b"
+    print(f"      Model: {model} (GPU-accelerated)")
     
     started_ollama = False
     
@@ -444,8 +435,8 @@ def process_with_qwen(transcript, context, ollama_process=None):
         
         print(f"      Processing: ", end='', flush=True)
         
-        # Adjust max tokens based on model
-        max_tokens = 32000 if use_32b else 16000
+        # Qwen 32B supports 32K context
+        max_tokens = 32000
         
         response = requests.post(
             "http://localhost:11434/api/generate",
