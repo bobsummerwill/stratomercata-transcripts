@@ -336,12 +336,12 @@ def test_qwen_context(test_sizes=[2000, 8000, 16000, 24000, 32000]):
     if not has_gpu:
         return {
             "provider": "Qwen",
-            "model": "qwen2.5:14b",
+            "model": "qwen2.5:7b",
             "error": "GPU Required - Qwen skipped on CPU-only system",
             "status": "skip"
         }
     
-    model = "qwen2.5:14b"
+    model = "qwen2.5:7b"
     
     print_info(f"Testing Qwen ({model} via Ollama)...")
     print_info("GPU detected - using 32B model")
