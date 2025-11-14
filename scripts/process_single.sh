@@ -24,10 +24,12 @@ if [ $# -eq 0 ]; then
     echo ""
     echo "Optional:"
     echo "  --batch-size <n>            Batch size for WhisperX (default: 16 GPU, 8 CPU)"
+    echo "  --force-cpu                 Force CPU mode for WhisperX (fixes torchvision issues)"
     echo ""
     echo "Examples:"
     echo "  $0 interview.mp3 --transcribers deepgram --processors sonnet,gemini"
     echo "  $0 interview.mp3 --transcribers whisperx,deepgram --processors chatgpt"
+    echo "  $0 interview.mp3 --transcribers whisperx --processors sonnet --force-cpu"
     exit 1
 fi
 
@@ -38,6 +40,7 @@ shift
 TRANSCRIBERS=""
 PROCESSORS=""
 BATCH_SIZE=""
+FORCE_CPU=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -52,6 +55,10 @@ while [[ $# -gt 0 ]]; do
         --batch-size)
             BATCH_SIZE="$2"
             shift 2
+            ;;
+        --force-cpu)
+            FORCE_CPU="--force-cpu"
+            shift
             ;;
         *)
             echo "Error: Unknown option: $1"
@@ -104,6 +111,9 @@ PHASE1_START=$(date +%s)
 TRANSCRIBE_CMD="python3 scripts/process_single_transcribe_and_diarize.py \"$AUDIO_FILE\" --transcribers \"$TRANSCRIBERS\""
 if [ -n "$BATCH_SIZE" ]; then
     TRANSCRIBE_CMD="$TRANSCRIBE_CMD --batch-size $BATCH_SIZE"
+fi
+if [ -n "$FORCE_CPU" ]; then
+    TRANSCRIBE_CMD="$TRANSCRIBE_CMD $FORCE_CPU"
 fi
 
 if ! eval $TRANSCRIBE_CMD; then

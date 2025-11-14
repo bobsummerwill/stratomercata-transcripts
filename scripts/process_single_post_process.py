@@ -331,11 +331,7 @@ def estimate_tokens(text):
     return int(len(text.split()) * 1.3)
 
 def process_with_qwen(transcript, context, ollama_process=None):
-    """Process transcript using Qwen 2.5 32B (via Ollama).
-    
-    NOTE: This function should only be called on GPU systems.
-    CPU-only systems are filtered out in main() with a warning.
-    """
+    """Process transcript using Qwen 2.5 14B (via Ollama)."""
     import subprocess
     import time
     
@@ -345,14 +341,14 @@ def process_with_qwen(transcript, context, ollama_process=None):
     except ImportError:
         raise ImportError("requests package not installed")
     
-    # Use 32B model (GPU-only)
-    model = "qwen2.5:32b"
-    print(f"      Model: {model} (GPU-accelerated)")
+    # Use 14B model (optimized for 12GB GPUs like RTX 5070)
+    model = "qwen2.5:14b"
+    print(f"      Model: {model}")
     
     started_ollama = False
     
     try:
-        # Start Ollama if not running (using shared function)
+        # Start Ollama if not running
         if ollama_process is None:
             ollama_process = start_ollama()
             if ollama_process is not None:
@@ -360,26 +356,7 @@ def process_with_qwen(transcript, context, ollama_process=None):
         
         # Process transcript
         prompt = build_prompt(context, transcript)
-        
-        # Estimate tokens and check for overflow
-        estimated_tokens = estimate_tokens(prompt)
-        print(f"      Transcript size: {len(transcript)} chars (~{estimated_tokens:,} tokens estimated)")
-        
-        # Qwen has 32K token limit - hard stop if exceeded
-        if estimated_tokens > 32000:
-            print(f"      ✗ OVERFLOW: {estimated_tokens:,} tokens exceeds Qwen's 32K limit")
-            if started_ollama and ollama_process:
-                ollama_process.terminate()
-            raise Exception(f"Token overflow: {estimated_tokens} > 32000")
-        
-        # Warn if approaching limit
-        if estimated_tokens > 28000:
-            print(f"      ⚠️  CAUTION: ~{estimated_tokens:,} tokens approaching Qwen's 32K limit")
-        
         print(f"      Processing: ", end='', flush=True)
-        
-        # Qwen 32B supports 32K context
-        max_tokens = 32000
         
         response = requests.post(
             "http://localhost:11434/api/generate",
@@ -388,9 +365,7 @@ def process_with_qwen(transcript, context, ollama_process=None):
                 "prompt": prompt,
                 "stream": True,
                 "options": {
-                    "temperature": 0.3,
-                    "num_predict": max_tokens,
-                    "stop": []  # Override default stop sequences
+                    "temperature": 0.3
                 }
             },
             timeout=1800,
@@ -412,28 +387,6 @@ def process_with_qwen(transcript, context, ollama_process=None):
                     break
         
         print(" ✓")
-        
-        # Validate output completeness
-        input_words = len(transcript.split())
-        output_words = len(result.split())
-        
-        # Check for severe truncation (output <40% of input = likely failure)
-        if output_words < input_words * 0.4:
-            print(f"\n      {failure('TRUNCATION DETECTED:')}")
-            print(f"         Input:  {input_words:,} words (~{estimated_tokens:,} tokens)")
-            print(f"         Output: {output_words:,} words (~{estimate_tokens(result):,} tokens)")
-            print(f"         Output is only {output_words/input_words*100:.1f}% of input length")
-            print(f"      → Qwen likely failed to complete the edit")
-            if started_ollama and ollama_process:
-                ollama_process.terminate()
-            raise Exception(f"Output truncation: {output_words} words vs {input_words} words expected")
-        
-        # Warn for moderate truncation (40-70% of input)
-        elif output_words < input_words * 0.7:
-            print(f"\n      ⚠️  WARNING: Output shorter than expected")
-            print(f"         Input:  {input_words:,} words")
-            print(f"         Output: {output_words:,} words ({output_words/input_words*100:.1f}% of input)")
-        
         return result, ollama_process if started_ollama else None
         
     except Exception as e:

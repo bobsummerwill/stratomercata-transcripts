@@ -184,23 +184,23 @@ if command -v ollama &> /dev/null; then
         echo "✓ Ollama service already running"
     fi
     
-    echo "Pulling Ollama model for qwen (GPU-only: qwen2.5:32b)..."
-    echo "Note: Qwen requires NVIDIA GPU with 12GB+ VRAM for transcript processing"
-    echo "This will download ~19GB - may take 10-20 minutes depending on your internet speed..."
+    echo "Pulling Ollama model for qwen (GPU-optimized: qwen2.5:14b)..."
+    echo "Note: Qwen requires NVIDIA GPU with 8GB+ VRAM for transcript processing"
+    echo "This will download ~8.5GB - may take 5-10 minutes depending on your internet speed..."
     echo ""
     
-    if ollama pull qwen2.5:32b 2>&1 | grep -q "success"; then
-        echo -e "${GREEN}✓ Model qwen2.5:32b downloaded${NC}"
+    if ollama pull qwen2.5:14b 2>&1 | grep -q "success"; then
+        echo -e "${GREEN}✓ Model qwen2.5:14b downloaded${NC}"
     else
-        echo -e "${YELLOW}⚠ Model qwen2.5:32b pull completed (check with: ollama list)${NC}"
+        echo -e "${YELLOW}⚠ Model qwen2.5:14b pull completed (check with: ollama list)${NC}"
     fi
     
     echo ""
-    echo -e "${GREEN}✓ Qwen 32B model ready (GPU-only):${NC}"
-    echo "  • Requires: NVIDIA GPU with 12GB+ VRAM (e.g., RTX 5070, 4070 Ti, etc.)"
+    echo -e "${GREEN}✓ Qwen 14B model ready (GPU-optimized):${NC}"
+    echo "  • Optimized for: RTX 5070 12GB, RTX 4070, and similar GPUs"
     echo "  • Uses: ~8-9GB VRAM during processing"
     echo "  • CPU-only systems: Qwen will be automatically skipped with warning"
-    echo "  • Performance: 30-60 seconds per transcript (150x faster than CPU)"
+    echo "  • Performance: 20-40 seconds per transcript"
 fi
 echo ""
 

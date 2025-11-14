@@ -101,7 +101,7 @@ def test_qwen():
         has_gpu = False
     
     print("\n" + "="*60)
-    print("Testing QWEN (qwen2.5:32b via Ollama)")
+    print("Testing QWEN (qwen2.5:14b via Ollama)")
     print("="*60)
     
     if not has_gpu:
@@ -112,7 +112,7 @@ def test_qwen():
         print()
         return "skipped"
     
-    model = "qwen2.5:32b"
+    model = "qwen2.5:14b"
     print(f"GPU detected - using {model}")
     
     ollama_process = None
