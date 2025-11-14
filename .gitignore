@@ -1,13 +1,6 @@
 # Audio Transcription Project .gitignore
 
 # ============================================================================
-# Project Output Directories
-# ============================================================================
-# Transcription intermediates and final outputs
-/intermediates/
-/outputs/
-
-# ============================================================================
 # Python
 # ============================================================================
 # Byte-compiled / optimized / DLL files
