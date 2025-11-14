@@ -158,7 +158,7 @@ echo "Installing/upgrading Ollama for local AI post-processing (optional, FREE, 
 if command -v ollama &> /dev/null; then
     CURRENT_VERSION=$(ollama --version 2>/dev/null | grep -oP 'ollama version is \K[0-9.]+' || echo "unknown")
     echo "Current version: $CURRENT_VERSION"
-    echo "Upgrading to latest version..."
+    echo "Running Ollama installer to check for updates..."
 else
     echo "Installing Ollama..."
 fi
@@ -166,7 +166,13 @@ fi
 # Always run installer - it handles upgrades and stops/restarts service automatically
 if curl -fsSL https://ollama.com/install.sh | sh; then
     NEW_VERSION=$(ollama --version 2>/dev/null | grep -oP 'ollama version is \K[0-9.]+' || echo "unknown")
-    echo -e "${GREEN}✓ Ollama ready (version: $NEW_VERSION)${NC}"
+    if [ "$CURRENT_VERSION" != "unknown" ] && [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
+        echo -e "${GREEN}✓ Ollama upgraded: $CURRENT_VERSION → $NEW_VERSION${NC}"
+    elif [ "$CURRENT_VERSION" = "$NEW_VERSION" ]; then
+        echo -e "${GREEN}✓ Ollama already at latest version: $NEW_VERSION${NC}"
+    else
+        echo -e "${GREEN}✓ Ollama installed (version: $NEW_VERSION)${NC}"
+    fi
 else
     echo -e "${YELLOW}⚠ Ollama installation/upgrade failed (non-fatal)${NC}"
     echo "  You can install it manually later: curl -fsSL https://ollama.com/install.sh | sh"
@@ -436,41 +442,26 @@ rm -f /tmp/speechbrain_patch.py
 echo ""
 
 # ==============================================================================
-# Step 10: LD_LIBRARY_PATH Configuration (NVIDIA Only)
+# Step 10: LD_LIBRARY_PATH Configuration (project-specific via setup_env.sh)
 # ==============================================================================
-# Configures system linker to locate PyTorch's CUDA libraries.
-# PyTorch packages CUDA libraries as separate pip packages in the venv.
-# LD_LIBRARY_PATH tells the system where to find these libraries at runtime.
-# Configuration persists across sessions by adding to ~/.bashrc.
+# Ensures setup_env.sh includes LD_LIBRARY_PATH for CUDA libraries
+# Project-specific (only active when setup_env.sh is sourced)
+# NOT added to ~/.bashrc to avoid global conflicts with other tools
 # ==============================================================================
-if [ "$HAS_NVIDIA" = true ]; then
-    echo -e "${YELLOW}[10/14] Configuring LD_LIBRARY_PATH for NVIDIA...${NC}"
-    echo "Adding all required CUDA library paths to ~/.bashrc"
-    echo "Required for PyTorch CUDA operations (cuDNN, cuBLAS, NVRTC, and CUDA 13.0 runtime)"
-    
-    BASHRC="$HOME/.bashrc"
-    # Add all CUDA library paths needed for PyTorch + pyannote operations
-    CUDNN_LIB="$VENV_DIR/lib/python3.12/site-packages/nvidia/cudnn/lib"
-    CUBLAS_LIB="$VENV_DIR/lib/python3.12/site-packages/nvidia/cublas/lib"
-    CU13_LIB="$VENV_DIR/lib/python3.12/site-packages/nvidia/cu13/lib"
-    LD_PATH_LINE="export LD_LIBRARY_PATH=$CUDNN_LIB:$CUBLAS_LIB:$CU13_LIB:\$LD_LIBRARY_PATH"
+echo -e "${YELLOW}[10/14] Configuring LD_LIBRARY_PATH in setup_env.sh${NC}"
+echo "Adding CUDA library paths to setup_env.sh (project-specific, not global)"
 
-    # Remove any existing entry
-    sed -i '/Added by install_packages_and_venv.sh/d' "$BASHRC"
-    sed -i '/nvidia.*LD_LIBRARY_PATH/d' "$BASHRC"
-    
-    # Add new entry
-    echo "" >> "$BASHRC"
-    echo "# Added by install_packages_and_venv.sh for PyTorch CUDA libraries" >> "$BASHRC"
-    echo "$LD_PATH_LINE" >> "$BASHRC"
-    
-    # Set for current session
-    export LD_LIBRARY_PATH="$CUDNN_LIB:$CUBLAS_LIB:$CU13_LIB:$LD_LIBRARY_PATH"
-    
-    echo -e "${GREEN}✓ LD_LIBRARY_PATH configured${NC}"
+if [ -f "$PROJECT_DIR/setup_env.sh" ]; then
+    # Check if LD_LIBRARY_PATH already configured
+    if grep -q "LD_LIBRARY_PATH.*nvidia/cudnn" "$PROJECT_DIR/setup_env.sh"; then
+        echo "✓ LD_LIBRARY_PATH already configured in setup_env.sh"
+    else
+        echo "Updating setup_env.sh to include LD_LIBRARY_PATH..."
+        # Note: This should already be in the template, but this is a fallback
+        echo "⚠ LD_LIBRARY_PATH not found - it should be in setup_env.sh.example template"
+    fi
 else
-    echo -e "${YELLOW}[10/14] Skipping LD_LIBRARY_PATH configuration${NC}"
-    echo "Not needed for CPU-only installations"
+    echo "⚠ setup_env.sh not found - will be created in Step 14"
 fi
 echo ""
 
