@@ -132,6 +132,127 @@ def load_terms_list():
 
 
 # ============================================================================
+# GPU and Process Management
+# ============================================================================
+
+def cleanup_gpu_memory(force_cpu=False):
+    """
+    Aggressive GPU memory cleanup to prevent CUDA OOM errors.
+    Kills zombie processes and clears PyTorch cache.
+    
+    Args:
+        force_cpu: If True, skip GPU-specific cleanup
+    """
+    import subprocess
+    import time
+    import gc
+    
+    # 1. Kill dangling Ollama processes
+    try:
+        import requests
+        try:
+            response = requests.get("http://localhost:11434/api/tags", timeout=1)
+            if response.status_code == 200:
+                subprocess.run(['pkill', '-f', 'ollama serve'], 
+                             stdout=subprocess.DEVNULL, 
+                             stderr=subprocess.DEVNULL,
+                             timeout=5)
+                time.sleep(1)
+        except:
+            pass
+    except Exception:
+        pass
+    
+    # 2. Kill dangling Python/WhisperX processes that might hold GPU
+    subprocess.run(['pkill', '-f', 'python.*whisper'], 
+                   stdout=subprocess.DEVNULL, 
+                   stderr=subprocess.DEVNULL)
+    time.sleep(1)
+    
+    # 3. Clear PyTorch GPU cache and force garbage collection
+    if not force_cpu:
+        try:
+            import torch
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.ipc_collect()
+        except:
+            pass
+    
+    gc.collect()
+
+
+def start_ollama():
+    """
+    Start Ollama service if not already running.
+    
+    Returns:
+        subprocess.Popen object if started, None if already running
+    """
+    import subprocess
+    import time
+    import requests
+    
+    # Check if already running
+    try:
+        response = requests.get("http://localhost:11434/api/tags", timeout=1)
+        if response.status_code == 200:
+            return None  # Already running
+    except:
+        pass
+    
+    # Start Ollama
+    print("  Starting Ollama service...")
+    process = subprocess.Popen(
+        ['ollama', 'serve'],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    
+    # Wait for service to be ready
+    for i in range(10):
+        time.sleep(1)
+        try:
+            response = requests.get("http://localhost:11434/api/tags", timeout=1)
+            if response.status_code == 200:
+                print("  ✓ Ollama started")
+                return process
+        except:
+            continue
+    
+    # Failed to start
+    process.terminate()
+    raise Exception("Ollama failed to start")
+
+
+def stop_ollama(process):
+    """
+    Stop Ollama service.
+    
+    Args:
+        process: subprocess.Popen object from start_ollama(), or None
+    """
+    import subprocess
+    
+    if process is None:
+        # Try to stop any running Ollama
+        subprocess.run(['pkill', '-f', 'ollama serve'], 
+                      stdout=subprocess.DEVNULL, 
+                      stderr=subprocess.DEVNULL,
+                      timeout=5)
+    else:
+        # Stop specific process
+        print("  Stopping Ollama service...")
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+            print("  ✓ Ollama stopped")
+        except:
+            process.kill()
+            print("  ✓ Ollama force stopped")
+
+
+# ============================================================================
 # File Saving Utilities
 # ============================================================================
 

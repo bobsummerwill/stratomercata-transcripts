@@ -158,7 +158,7 @@ echo "Installing/upgrading Ollama for local AI post-processing (optional, FREE, 
 if command -v ollama &> /dev/null; then
     CURRENT_VERSION=$(ollama --version 2>/dev/null | grep -oP 'ollama version is \K[0-9.]+' || echo "unknown")
     echo "Current version: $CURRENT_VERSION"
-    echo "Upgrading to latest version..."
+    echo "Running Ollama installer to check for updates..."
 else
     echo "Installing Ollama..."
 fi
@@ -166,7 +166,13 @@ fi
 # Always run installer - it handles upgrades and stops/restarts service automatically
 if curl -fsSL https://ollama.com/install.sh | sh; then
     NEW_VERSION=$(ollama --version 2>/dev/null | grep -oP 'ollama version is \K[0-9.]+' || echo "unknown")
-    echo -e "${GREEN}✓ Ollama ready (version: $NEW_VERSION)${NC}"
+    if [ "$CURRENT_VERSION" != "unknown" ] && [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
+        echo -e "${GREEN}✓ Ollama upgraded: $CURRENT_VERSION → $NEW_VERSION${NC}"
+    elif [ "$CURRENT_VERSION" = "$NEW_VERSION" ]; then
+        echo -e "${GREEN}✓ Ollama already at latest version: $NEW_VERSION${NC}"
+    else
+        echo -e "${GREEN}✓ Ollama installed (version: $NEW_VERSION)${NC}"
+    fi
 else
     echo -e "${YELLOW}⚠ Ollama installation/upgrade failed (non-fatal)${NC}"
     echo "  You can install it manually later: curl -fsSL https://ollama.com/install.sh | sh"
@@ -184,23 +190,23 @@ if command -v ollama &> /dev/null; then
         echo "✓ Ollama service already running"
     fi
     
-    echo "Pulling Ollama model for qwen (GPU-only: qwen2.5:32b)..."
-    echo "Note: Qwen requires NVIDIA GPU with 12GB+ VRAM for transcript processing"
-    echo "This will download ~19GB - may take 10-20 minutes depending on your internet speed..."
+    echo "Pulling Ollama model for qwen (GPU-optimized: qwen2.5:14b)..."
+    echo "Note: Qwen requires NVIDIA GPU with 8GB+ VRAM for transcript processing"
+    echo "This will download ~8.5GB - may take 5-10 minutes depending on your internet speed..."
     echo ""
     
-    if ollama pull qwen2.5:32b 2>&1 | grep -q "success"; then
-        echo -e "${GREEN}✓ Model qwen2.5:32b downloaded${NC}"
+    if ollama pull qwen2.5:14b 2>&1 | grep -q "success"; then
+        echo -e "${GREEN}✓ Model qwen2.5:14b downloaded${NC}"
     else
-        echo -e "${YELLOW}⚠ Model qwen2.5:32b pull completed (check with: ollama list)${NC}"
+        echo -e "${YELLOW}⚠ Model qwen2.5:14b pull completed (check with: ollama list)${NC}"
     fi
     
     echo ""
-    echo -e "${GREEN}✓ Qwen 32B model ready (GPU-only):${NC}"
-    echo "  • Requires: NVIDIA GPU with 12GB+ VRAM (e.g., RTX 5070, 4070 Ti, etc.)"
+    echo -e "${GREEN}✓ Qwen 14B model ready (GPU-optimized):${NC}"
+    echo "  • Optimized for: RTX 5070 12GB, RTX 4070, and similar GPUs"
     echo "  • Uses: ~8-9GB VRAM during processing"
     echo "  • CPU-only systems: Qwen will be automatically skipped with warning"
-    echo "  • Performance: 30-60 seconds per transcript (150x faster than CPU)"
+    echo "  • Performance: 20-40 seconds per transcript"
 fi
 echo ""
 
@@ -247,31 +253,24 @@ echo -e "${GREEN}✓ Base packages installed${NC}"
 echo ""
 
 # ==============================================================================
-# Step 5: PyTorch Upgrade
+# Step 5: PyTorch Upgrade to 2.9.0 with CUDA 13.0
 # ==============================================================================
-# Upgrades PyTorch from 2.8.0 (WhisperX default) to 2.9.0 with correct build.
+# Upgrades PyTorch from 2.8.0 (WhisperX default) to 2.9.0 with CUDA 13.0.
 # PyTorch 2.9.0 provides full Blackwell (sm_120) support for RTX 50-series GPUs.
 # CUDA 13.0 offers the latest optimizations and performance improvements.
-# Uses --force-reinstall to ensure correct CUDA/CPU variant is installed.
+# Always install CUDA build - required for GPU acceleration.
+# Uses --force-reinstall to ensure correct CUDA variant is installed.
 # ==============================================================================
-echo -e "${YELLOW}[5/14] Upgrading PyTorch to 2.9.0...${NC}"
-echo "Upgrading PyTorch 2.8.0 → 2.9.0 with correct build for detected hardware"
+echo -e "${YELLOW}[5/14] Upgrading PyTorch to 2.9.0 with CUDA 13.0...${NC}"
+echo "Upgrading PyTorch 2.8.0 → 2.9.0 with CUDA 13.0"
 echo "Provides full Blackwell (sm_120) support for RTX 50-series GPUs"
 echo "This may take 2-5 minutes depending on internet speed..."
-if [ "$HAS_NVIDIA" = true ]; then
-    echo "Installing: PyTorch 2.9.0 with CUDA 13.0 support"
-    pip install --force-reinstall --index-url https://download.pytorch.org/whl/cu130 \
-        torch==2.9.0 \
-        torchvision==0.24.0 \
-        torchaudio==2.9.0
-else
-    echo "Installing: PyTorch 2.9.0 CPU-only build"
-    pip install --force-reinstall --index-url https://download.pytorch.org/whl/cpu \
-        torch==2.9.0 \
-        torchvision==0.24.0 \
-        torchaudio==2.9.0
-fi
-echo -e "${GREEN}✓ PyTorch 2.9.0 installed${NC}"
+echo "Installing: PyTorch 2.9.0 with CUDA 13.0 support"
+pip install --force-reinstall --index-url https://download.pytorch.org/whl/cu130 \
+    torch==2.9.0 \
+    torchvision==0.24.0 \
+    torchaudio==2.9.0
+echo -e "${GREEN}✓ PyTorch 2.9.0+cu130 installed${NC}"
 echo ""
 
 # ==============================================================================
@@ -443,41 +442,26 @@ rm -f /tmp/speechbrain_patch.py
 echo ""
 
 # ==============================================================================
-# Step 10: LD_LIBRARY_PATH Configuration (NVIDIA Only)
+# Step 10: LD_LIBRARY_PATH Configuration (project-specific via setup_env.sh)
 # ==============================================================================
-# Configures system linker to locate PyTorch's CUDA libraries.
-# PyTorch packages CUDA libraries as separate pip packages in the venv.
-# LD_LIBRARY_PATH tells the system where to find these libraries at runtime.
-# Configuration persists across sessions by adding to ~/.bashrc.
+# Ensures setup_env.sh includes LD_LIBRARY_PATH for CUDA libraries
+# Project-specific (only active when setup_env.sh is sourced)
+# NOT added to ~/.bashrc to avoid global conflicts with other tools
 # ==============================================================================
-if [ "$HAS_NVIDIA" = true ]; then
-    echo -e "${YELLOW}[10/14] Configuring LD_LIBRARY_PATH for NVIDIA...${NC}"
-    echo "Adding all required CUDA library paths to ~/.bashrc"
-    echo "Required for PyTorch CUDA operations (cuDNN, cuBLAS, NVRTC, and CUDA 13.0 runtime)"
-    
-    BASHRC="$HOME/.bashrc"
-    # Add all CUDA library paths needed for PyTorch + pyannote operations
-    CUDNN_LIB="$VENV_DIR/lib/python3.12/site-packages/nvidia/cudnn/lib"
-    CUBLAS_LIB="$VENV_DIR/lib/python3.12/site-packages/nvidia/cublas/lib"
-    CU13_LIB="$VENV_DIR/lib/python3.12/site-packages/nvidia/cu13/lib"
-    LD_PATH_LINE="export LD_LIBRARY_PATH=$CUDNN_LIB:$CUBLAS_LIB:$CU13_LIB:\$LD_LIBRARY_PATH"
+echo -e "${YELLOW}[10/14] Configuring LD_LIBRARY_PATH in setup_env.sh${NC}"
+echo "Adding CUDA library paths to setup_env.sh (project-specific, not global)"
 
-    # Remove any existing entry
-    sed -i '/Added by install_packages_and_venv.sh/d' "$BASHRC"
-    sed -i '/nvidia.*LD_LIBRARY_PATH/d' "$BASHRC"
-    
-    # Add new entry
-    echo "" >> "$BASHRC"
-    echo "# Added by install_packages_and_venv.sh for PyTorch CUDA libraries" >> "$BASHRC"
-    echo "$LD_PATH_LINE" >> "$BASHRC"
-    
-    # Set for current session
-    export LD_LIBRARY_PATH="$CUDNN_LIB:$CUBLAS_LIB:$CU13_LIB:$LD_LIBRARY_PATH"
-    
-    echo -e "${GREEN}✓ LD_LIBRARY_PATH configured${NC}"
+if [ -f "$PROJECT_DIR/setup_env.sh" ]; then
+    # Check if LD_LIBRARY_PATH already configured
+    if grep -q "LD_LIBRARY_PATH.*nvidia/cudnn" "$PROJECT_DIR/setup_env.sh"; then
+        echo "✓ LD_LIBRARY_PATH already configured in setup_env.sh"
+    else
+        echo "Updating setup_env.sh to include LD_LIBRARY_PATH..."
+        # Note: This should already be in the template, but this is a fallback
+        echo "⚠ LD_LIBRARY_PATH not found - it should be in setup_env.sh.example template"
+    fi
 else
-    echo -e "${YELLOW}[10/14] Skipping LD_LIBRARY_PATH configuration${NC}"
-    echo "Not needed for CPU-only installations"
+    echo "⚠ setup_env.sh not found - will be created in Step 14"
 fi
 echo ""
 
