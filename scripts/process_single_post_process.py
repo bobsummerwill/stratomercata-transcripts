@@ -41,25 +41,44 @@ def save_processed_files(output_dir, basename, transcriber, processor, content):
     output_path = Path(output_dir) / f"{basename}_{transcriber}_{processor}_processed.txt"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
-    # Clean up content
+    # Clean up content - remove code fences and continuation messages
     content_lines = [line.rstrip() for line in content.split('\n')]
     content_clean = '\n'.join(content_lines)
     
-    # Save text version (NO timestamps)
-    # Strip timestamps like [150.9s] from beginning of lines
+    # Remove markdown code fences (triple backticks)
+    content_clean = re.sub(r'^```\s*$', '', content_clean, flags=re.MULTILINE)
+    content_clean = re.sub(r'^```.*$', '', content_clean, flags=re.MULTILINE)
+    
+    # Remove continuation messages (with square brackets or parentheses)
+    content_clean = re.sub(r'\[Transcript continues.*?\]', '', content_clean, flags=re.IGNORECASE)
+    content_clean = re.sub(r'\(Transcript continues.*?\)', '', content_clean, flags=re.IGNORECASE)
+    
+    # Clean up multiple blank lines
+    content_clean = re.sub(r'\n{3,}', '\n\n', content_clean)
+    content_clean = content_clean.strip()
+    
+    # Save text version (NO timestamps, NO markdown formatting)
     text_lines = []
     for line in content_clean.split('\n'):
-        # Remove timestamp pattern [XXX.Xs] at start of line
-        clean_line = re.sub(r'^\[[\d.]+s\] ', '', line)
+        # Remove timestamp pattern [MM:SS] or [HH:MM:SS] at start of line
+        clean_line = re.sub(r'^\[\d{1,2}:\d{2}(?::\d{2})?\] ', '', line)
+        # Remove markdown bold formatting from speaker labels
+        clean_line = re.sub(r'^\*\*(SPEAKER_\d+):\*\*$', r'\1:', clean_line)
         text_lines.append(clean_line)
     
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write('\n'.join(text_lines))
     
-    # Save markdown version (WITH timestamps, convert SPEAKER_ labels to bold)
+    # Save markdown version (WITH timestamps, convert SPEAKER_ labels to bold if not already)
     md_path = output_path.with_suffix('.md')
-    md_content = content_clean.replace('\n\nSPEAKER_', '\n\n**SPEAKER_')
-    md_content = md_content.replace(':\n', ':**\n')
+    md_lines = []
+    for line in content_clean.split('\n'):
+        # Ensure speaker labels are bold (if not already)
+        if re.match(r'^SPEAKER_\d+:$', line):
+            line = f"**{line}**"
+        md_lines.append(line)
+    
+    md_content = '\n'.join(md_lines)
     with open(md_path, 'w', encoding='utf-8') as f:
         f.write(md_content)
     
@@ -86,42 +105,47 @@ Your tasks:
 4. Use generic labels SPEAKER_01, SPEAKER_02, etc. (do not add actual names)
 5. Improve punctuation and sentence structure for readability
 6. Add paragraph breaks at natural conversation transitions
-7. **CRITICAL: PRESERVE ALL TIMESTAMPS**
-8. Maintain speaker label format (speaker name followed by colon)
+7. **CRITICAL: PRESERVE ALL TIMESTAMPS - DO NOT REMOVE THEM**
+8. Maintain speaker label format: SPEAKER_XX: (not bold, just plain text with colon)
 
-**TIMESTAMP FORMAT REQUIREMENT (MANDATORY):**
-Every line of dialogue MUST retain its timestamp in [MM:SS] format at the start of the line.
+**TIMESTAMP PRESERVATION IS ABSOLUTELY MANDATORY:**
+
+EVERY single line of dialogue in the input has a timestamp. You MUST keep all of them in the output.
 
 Format specifications:
-- Use minutes:seconds format: [MM:SS]
-- Always use 2 digits for both minutes and seconds (e.g., 00:05, 02:12, 15:47)
-- No decimal fractions - round to nearest second
-- First minute should be 00 (e.g., [00:15] for 15 seconds)
+- Convert timestamps to [MM:SS] format if they're not already
+- Use 2 digits for minutes and seconds: [00:05], [02:12], [15:47]
+- Round decimal seconds to nearest whole second
+- First minute is 00 (e.g., [00:15] for 15 seconds)
+- Timestamps go at the START of each dialogue line
 
-CORRECT FORMAT EXAMPLES:
-```
-**SPEAKER_01:**
-[00:01] Okay, welcome everyone.
-[00:03] We have a very special topic today.
-[02:12] Let me explain the technical details.
-```
+REQUIRED OUTPUT FORMAT:
 
-INCORRECT FORMATS (DO NOT USE):
-```
-**SPEAKER_01:**
-[1.8s] Wrong - no decimal fractions allowed
-[132.2s] Wrong - must use MM:SS format
-Okay, welcome everyone. Wrong - missing timestamp entirely
-```
+SPEAKER_01:
+[00:01] Welcome everyone to today's discussion.
+[00:05] We're going to talk about Ethereum.
 
-The timestamps [MM:SS] are REQUIRED and must appear at the beginning of every text line. This is non-negotiable.
+SPEAKER_02:
+[00:12] Thanks for having me.
+[00:14] I'm excited to share my perspective.
 
-Important: 
-- Only make changes where you are confident
-- If unsure about a technical term, leave it as-is
-- NEVER remove timestamps - they are structural requirements, not optional metadata
+DO NOT use markdown formatting:
+- NO triple backticks (```)
+- NO bold formatting (**SPEAKER_01:**) - just plain SPEAKER_01:
+- NO "Corrected Transcript" headers
+- NO continuation messages like "(Transcript continues...)"
 
-Output the corrected transcript maintaining the exact same format structure with all timestamps intact."""
+Critical rules:
+- DO NOT wrap output in code fences
+- DO NOT add any preamble or explanation
+- DO NOT remove or skip any timestamps from the input
+- DO NOT add metadata or notes
+- Just output the corrected transcript directly
+
+If the input has timestamps like [15.8s], convert to [00:16].
+If the input has timestamps like [245.3s], convert to [04:05].
+
+Start your output immediately with the first speaker label (no introduction needed)."""
 
 def build_prompt(context, transcript):
     """Build complete prompt from template."""
@@ -224,8 +248,8 @@ def process_with_anthropic(transcript, api_key, context):
     return result
 
 def process_with_openai(transcript, api_key, context):
-    """Process transcript using ChatGPT-4o-latest with streaming."""
-    model = "chatgpt-4o-latest"
+    """Process transcript using GPT-4o with streaming."""
+    model = "gpt-4o"  # Using gpt-4o instead of chatgpt-4o-latest for better output capacity
     try:
         import openai
     except ImportError:
@@ -234,6 +258,7 @@ def process_with_openai(transcript, api_key, context):
     client = openai.OpenAI(api_key=api_key)
     prompt = build_prompt(context, transcript)
     
+    print(f"      Model: {model}")
     print(f"      Processing: ", end='', flush=True)
     
     result = ""
@@ -245,7 +270,7 @@ def process_with_openai(transcript, api_key, context):
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=16384,
+        max_tokens=16384,  # gpt-4o supports up to 16K output tokens
         stream=True
     )
     
