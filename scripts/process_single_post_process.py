@@ -248,8 +248,8 @@ def process_with_anthropic(transcript, api_key, context):
     return result
 
 def process_with_openai(transcript, api_key, context):
-    """Process transcript using GPT-4o with streaming."""
-    model = "gpt-4o"  # Using gpt-4o instead of chatgpt-4o-latest for better output capacity
+    """Process transcript using GPT-4.1 with streaming."""
+    model = "gpt-4.1"  # GPT-4.1 model with 32K output token support
     try:
         import openai
     except ImportError:
@@ -270,7 +270,7 @@ def process_with_openai(transcript, api_key, context):
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=16384,  # gpt-4o supports up to 16K output tokens
+        max_tokens=32768,  # GPT-4.1 supports up to 32K output tokens
         stream=True
     )
     
@@ -336,7 +336,7 @@ def process_with_groq(transcript, api_key, context):
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt}
         ],
-        max_tokens=8000,
+        max_tokens=32000,  # Groq Llama 3.3 70B supports up to 32K output tokens
         temperature=0.3,
         stream=True
     )
@@ -390,7 +390,8 @@ def process_with_qwen(transcript, context, ollama_process=None):
                 "prompt": prompt,
                 "stream": True,
                 "options": {
-                    "temperature": 0.3
+                    "temperature": 0.3,
+                    "num_predict": 32000  # Qwen 2.5 14B - increase output token limit
                 }
             },
             timeout=1800,
@@ -580,7 +581,7 @@ def main():
     # Map processor names to their environment variable names
     key_mapping = {
         'sonnet': 'ANTHROPIC_API_KEY',     # Claude Sonnet 4.5 via Anthropic
-        'chatgpt': 'OPENAI_API_KEY',       # ChatGPT-4o-latest via OpenAI
+        'chatgpt': 'OPENAI_API_KEY',       # GPT-4.1 via OpenAI
         'gemini': 'GOOGLE_API_KEY',        # Gemini 2.5 Pro via Google
         'llama': 'GROQ_API_KEY'            # Llama 3.3 70B via Groq
     }
