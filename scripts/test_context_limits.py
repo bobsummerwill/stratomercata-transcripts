@@ -15,6 +15,7 @@ POST-PROCESSING PROVIDERS TESTED:
 
 TRANSCRIPTION PROVIDERS (audio length limits, not context windows):
 - WhisperX (local GPU) - No length limit
+- WhisperX-Cloud (Replicate cloud) - No length limit
 - AssemblyAI (cloud) - No length limit
 - Deepgram (cloud) - No length limit
 - Sonix (cloud) - No length limit
@@ -430,6 +431,132 @@ def test_qwen_context(test_sizes=[2000, 8000, 16000, 24000, 32000]):
     return results
 
 
+def test_groq_llama_context(test_sizes=[10000, 50000, 100000, 120000, 128000]):
+    """Test Groq Llama 3.3 70B context limits"""
+    try:
+        import openai
+    except ImportError:
+        return {"error": "openai package not installed", "status": "skip"}
+
+    api_key = os.environ.get('GROQ_API_KEY')
+    if not api_key:
+        return {"error": "GROQ_API_KEY not set", "status": "skip"}
+
+    print_info("Testing Groq Llama 3.3 70B...")
+    client = openai.OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
+
+    results = {
+        "provider": "Groq",
+        "model": "llama-3.3-70b-versatile",
+        "advertised": "128,000 tokens",
+        "tested": [],
+        "max_working": 0,
+        "status": "tested"
+    }
+
+    for size in test_sizes:
+        print(f"  Testing {size:,} tokens...", end=" ", flush=True)
+        payload, actual_tokens = generate_test_payload(size, "gpt-4")
+
+        try:
+            start = time.time()
+            response = client.chat.completions.create(
+                model="llama-3.3-70b-versatile",
+                max_tokens=50,
+                messages=[{
+                    "role": "user",
+                    "content": f"{payload}\n\nRespond with just: OK"
+                }]
+            )
+            elapsed = time.time() - start
+
+            print_success(f"{actual_tokens:,} tokens OK ({elapsed:.1f}s)")
+            results["tested"].append({
+                "target": size,
+                "actual": actual_tokens,
+                "success": True,
+                "time": elapsed
+            })
+            results["max_working"] = actual_tokens
+            time.sleep(0.5)  # Rate limit courtesy
+
+        except Exception as e:
+            error_msg = str(e)
+            print_failure(f"Failed - {error_msg[:100]}")
+            results["tested"].append({
+                "target": size,
+                "actual": actual_tokens,
+                "success": False,
+                "error": error_msg[:200]
+            })
+            break
+
+    return results
+
+
+def test_groq_qwen_context(test_sizes=[10000, 50000, 100000, 120000, 128000]):
+    """Test Groq Qwen3 32B context limits"""
+    try:
+        import openai
+    except ImportError:
+        return {"error": "openai package not installed", "status": "skip"}
+
+    api_key = os.environ.get('GROQ_API_KEY')
+    if not api_key:
+        return {"error": "GROQ_API_KEY not set", "status": "skip"}
+
+    print_info("Testing Groq Qwen3 32B...")
+    client = openai.OpenAI(api_key=api_key, base_url="https://api.groq.com/openai/v1")
+
+    results = {
+        "provider": "Groq",
+        "model": "qwen/qwen3-32b",
+        "advertised": "128,000 tokens",
+        "tested": [],
+        "max_working": 0,
+        "status": "tested"
+    }
+
+    for size in test_sizes:
+        print(f"  Testing {size:,} tokens...", end=" ", flush=True)
+        payload, actual_tokens = generate_test_payload(size, "gpt-4")
+
+        try:
+            start = time.time()
+            response = client.chat.completions.create(
+                model="qwen/qwen3-32b",
+                max_tokens=50,
+                messages=[{
+                    "role": "user",
+                    "content": f"{payload}\n\nRespond with just: OK"
+                }]
+            )
+            elapsed = time.time() - start
+
+            print_success(f"{actual_tokens:,} tokens OK ({elapsed:.1f}s)")
+            results["tested"].append({
+                "target": size,
+                "actual": actual_tokens,
+                "success": True,
+                "time": elapsed
+            })
+            results["max_working"] = actual_tokens
+            time.sleep(0.5)  # Rate limit courtesy
+
+        except Exception as e:
+            error_msg = str(e)
+            print_failure(f"Failed - {error_msg[:100]}")
+            results["tested"].append({
+                "target": size,
+                "actual": actual_tokens,
+                "success": False,
+                "error": error_msg[:200]
+            })
+            break
+
+    return results
+
+
 # ============================================================================
 # Report Generation
 # ============================================================================
@@ -446,21 +573,21 @@ def generate_report(all_results):
     report.append("  Plus system prompts: ~5,000 tokens")
     report.append("  Total needed: ~45,000 tokens maximum")
     report.append("\n" + "="*70 + "\n")
-    
+
     for result in all_results:
         if result["status"] == "skip":
             report.append(f"\n{result['provider']}: SKIPPED")
             report.append(f"  Reason: {result['error']}")
             continue
-        
+
         report.append(f"\n{result['provider']}: {result['model']}")
         report.append(f"  Advertised: {result['advertised']}")
         report.append(f"  Maximum Tested: {result['max_working']:,} tokens")
-        
+
         # Calculate recommended safe limit (5% buffer)
         safe_limit = int(result['max_working'] * 0.95)
         report.append(f"  Recommended Safe Limit: {safe_limit:,} tokens (with 5% buffer)")
-        
+
         # Determine if chunking needed
         if result['max_working'] >= 50000:
             report.append(f"  Chunking Needed: NO - Perfect for your transcripts!")
@@ -468,7 +595,7 @@ def generate_report(all_results):
             report.append(f"  Chunking Needed: BORDERLINE - Should work but close")
         else:
             report.append(f"  Chunking Needed: YES - Transcripts may need splitting")
-        
+
         # Test details
         report.append("\n  Test Results:")
         for test in result['tested']:
@@ -476,18 +603,18 @@ def generate_report(all_results):
                 report.append(f"    ✓ {test['actual']:,} tokens - OK ({test['time']:.1f}s)")
             else:
                 report.append(f"    ✗ {test['actual']:,} tokens - FAILED")
-        
+
         # Special notes
         if 'beta_access' in result:
             if result['beta_access']:
                 report.append("\n  🎉 EXTENDED CONTEXT: 1M token beta access available!")
             else:
                 report.append("\n  ℹ Extended context (1M tokens) not available on your tier")
-    
+
     report.append("\n" + "="*70)
     report.append("\nRECOMMENDATIONS FOR YOUR TRANSCRIPTS:")
     report.append("="*70)
-    
+
     # Find best provider
     best_providers = [r for r in all_results if r['status'] == 'tested' and r['max_working'] >= 50000]
     if best_providers:
@@ -496,21 +623,21 @@ def generate_report(all_results):
         report.append(f"  Context: {best['max_working']:,} tokens")
         report.append(f"  Perfect for your transcripts without chunking")
         report.append(f"  Maintains full context for best quality")
-    
+
     # Alternative providers
     alternatives = [r for r in all_results if r['status'] == 'tested' and r['max_working'] >= 45000 and r['provider'] != (best['provider'] if best_providers else None)]
     if alternatives:
         report.append("\nALTERNATIVES:")
         for alt in alternatives:
             report.append(f"  - {alt['provider']}: {alt['max_working']:,} tokens")
-    
+
     # Chunking required
     chunking_needed = [r for r in all_results if r['status'] == 'tested' and r['max_working'] < 45000]
     if chunking_needed:
         report.append("\nREQUIRE CHUNKING (not ideal for quality):")
         for cn in chunking_needed:
             report.append(f"  - {cn['provider']}: {cn['max_working']:,} tokens")
-    
+
     return "\n".join(report)
 
 
@@ -524,7 +651,7 @@ def main():
     )
     parser.add_argument(
         "--providers",
-        default="anthropic,openai,gemini,qwen",
+        default="anthropic,openai,gemini,groq-llama,groq-qwen,qwen",
         help="Comma-separated list of providers to test"
     )
     parser.add_argument(
@@ -537,17 +664,17 @@ def main():
         default="intermediates/context_limits_report.txt",
         help="Output file for results"
     )
-    
+
     args = parser.parse_args()
-    
+
     print_header("AI Context Window Limit Testing")
     print_info("Testing all providers with real API calls")
     print_info("Estimated cost: ~$0.01-0.05 total")
     print()
-    
+
     providers = [p.strip() for p in args.providers.split(',')]
     all_results = []
-    
+
     # Test each provider
     for provider in providers:
         if provider == 'anthropic':
@@ -558,25 +685,29 @@ def main():
             result = test_gemini_context()
         elif provider == 'qwen':
             result = test_qwen_context()
+        elif provider == 'groq-llama':
+            result = test_groq_llama_context()
+        elif provider == 'groq-qwen':
+            result = test_groq_qwen_context()
         else:
             print_warning(f"Unknown provider: {provider}")
             continue
-        
+
         all_results.append(result)
         print()
-    
+
     # Generate report
     print_header("Generating Report")
     report = generate_report(all_results)
-    
+
     # Save to file
     output_path = Path(args.output)
     with open(output_path, 'w') as f:
         f.write(report)
-    
+
     print_success(f"Report saved to: {output_path}")
     print()
-    
+
     # Display report
     print(report)
 
