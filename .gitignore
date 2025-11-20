@@ -89,7 +89,7 @@ dmypy.json
 # Audio Files (if tracking source files separately)
 # ============================================================================
 # Uncomment if you want to exclude audio files from git
-# *.mp3
+*.mp3
 # *.wav
 # *.m4a
 # *.flac
