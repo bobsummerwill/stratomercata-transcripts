@@ -563,11 +563,11 @@ def process_single_combination(transcript_path, provider, api_keys, context, oll
         elif provider == "gemini":
             corrected = process_with_gemini(transcript, api_keys['gemini'], context)
         elif provider == "llama":
-                corrected = process_with_groq(transcript, api_keys['llama'], context)
-    elif provider == "qwen-cloud":
-        corrected = process_with_groq_qwen(transcript, api_keys['qwen-cloud'], context)
-    elif provider == "qwen":
-        corrected, new_ollama_process = process_with_qwen(transcript, context, ollama_process)
+            corrected = process_with_groq(transcript, api_keys['llama'], context)
+        elif provider == "qwen-cloud":
+            corrected = process_with_groq_qwen(transcript, api_keys['qwen-cloud'], context)
+        elif provider == "qwen":
+            corrected, new_ollama_process = process_with_qwen(transcript, context, ollama_process)
     except Exception as e:
         elapsed = time.time() - start_time
         print(f"      {failure(f'Processing failed ({elapsed:.1f}s): {e}')}")
