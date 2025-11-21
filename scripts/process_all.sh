@@ -61,8 +61,7 @@ while [[ $# -gt 0 ]]; do
 done
 
 # Directories
-PROJECT_DIR="/home/zombietiger/Projects/stratomercata-transcripts"
-DOWNLOADS_DIR="/home/zombietiger/Downloads"
+PROJECT_DIR="$(pwd)"
 INTERMEDIATES_DIR="$PROJECT_DIR/intermediates"
 OUTPUT_DIR="$PROJECT_DIR/outputs"
 
@@ -83,7 +82,7 @@ source venv/bin/activate
 source setup_env.sh
 
 # Find all MP3 files
-MP3_FILES=("project root directory"/*.mp3)
+MP3_FILES=(*.mp3)
 TOTAL=${#MP3_FILES[@]}
 
 if [ $TOTAL -eq 0 ] || [ ! -e "${MP3_FILES[0]}" ]; then

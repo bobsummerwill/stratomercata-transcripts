@@ -448,45 +448,50 @@ def transcribe_whisperx_cloud(audio_path, output_dir):
     start_time = time.time()
     
     try:
-        # Run WhisperX on Replicate - matches local large-v3 settings
+        # Run WhisperX on Replicate - uses WhisperX + Pyannote diarization from Replicate model
         prediction = replicate.run(
-            "victor-upmeet/whisperx",
+            "victor-upmeet/whisperx:84d2ad2d6194fe98a17d2b60bef1c7f910c46b2f6fd38996ca457afd9c8abfcb",
             input={
-                "audio": audio_path,  # File path - Replicate handles upload
+                "audio_file": open(audio_path, "rb"),  # File upload for WhisperX + Pyannote diarization
                 "model": "large-v3",
                 "language": "en",
-                "diarize": True,  # Enable speaker diarization like local
-                "vad_filter": True
+                "diarization": True,
+                "huggingface_access_token": "hf_" + os.environ.get('HF_TOKEN', ''),  # Add HF token prefix
+                "batch_size": 8
             }
         )
         
         elapsed = time.time() - start_time
         print(f"  Transcribed in {elapsed:.1f}s")
-        
+
+        # Debug: Print prediction to understand format
+        print(f"Debug prediction type: {type(prediction)}")
+        print(f"Debug prediction sample: {str(prediction)[:500]}...")
+        # Additional debug
+        print(f"Full prediction: {prediction}")
+
         # Parse the output
         segments = []
-        
-        # Replicate returns a structure with segments including speaker info
-        # Format: list of dicts like {"start": 0.0, "end": 4.2, "text": "...", "speaker": "SPEAKER_00"}
-        if isinstance(prediction, list) and prediction:
-            for seg in prediction:
+
+        # Assuming prediction is a dict with 'segments' list
+        pred_segments = prediction.get('segments', [])
+
+        if pred_segments:
+            for seg in pred_segments:
                 start = float(seg.get('start', 0))
                 end = float(seg.get('end', 0))
                 speaker = seg.get('speaker', 'SPEAKER_00')
-                
-                # Normalize speaker labels to match local format
-                if not speaker.startswith('SPEAKER_'):
+                if speaker and not speaker.startswith('SPEAKER_'):
                     speaker = f'SPEAKER_{int(speaker):02d}'
-                
                 text = seg.get('text', '').strip()
-                
+
                 segments.append({
                     'start': start,
                     'end': end,
                     'speaker': speaker,
                     'text': text
                 })
-        
+
         if not segments:
             raise ValueError("No transcription segments returned from Replicate")
         
@@ -708,4 +713,4 @@ def transcribe_assemblyai(audio_path, output_dir):
 
 
 if __name__ == "__main__":
-main()
+    main()
