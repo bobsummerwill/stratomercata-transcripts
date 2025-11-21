@@ -25,12 +25,12 @@ from common import (Colors, success, failure, skip, validate_api_key,
 def extract_transcriber_from_filename(filepath):
     """Parse transcriber name from intermediate filename."""
     filename = Path(filepath).stem
-    
-    for service in ['whisperx', 'assemblyai', 'deepgram', 'openai']:
-        if f'_{service}_raw' in filename:
-            basename = filename.replace(f'_{service}_raw', '')
+
+    for service in ['whisperx', 'whisperx-cloud', 'assemblyai', 'deepgram', 'openai']:
+        if f'_{service}' in filename:
+            basename = filename.replace(f'_{service}', '')
             return basename, service
-    
+
     return filename, "whisperx"
 
 

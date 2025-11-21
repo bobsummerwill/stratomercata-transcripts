@@ -36,7 +36,7 @@ def save_transcript_files(output_dir, basename, service_name, segments, speaker_
     Returns:
         Path object for the .txt file
     """
-    output_path = Path(output_dir) / f"{basename}_{service_name}_raw.txt"
+    output_path = Path(output_dir) / f"{basename}_{service_name}.txt"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Save text version (NO timestamps)
@@ -83,7 +83,7 @@ def save_raw_transcript_from_text(output_dir, basename, service_name, formatted_
     """
     import re
     
-    output_path = Path(output_dir) / f"{basename}_{service_name}_raw.txt"
+    output_path = Path(output_dir) / f"{basename}_{service_name}.txt"
     output_path.parent.mkdir(parents=True, exist_ok=True)
     
     # Save text version (NO timestamps)
