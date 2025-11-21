@@ -456,7 +456,7 @@ def transcribe_whisperx_cloud(audio_path, output_dir):
                 "model": "large-v3",
                 "language": "en",
                 "diarization": True,
-                "huggingface_access_token": "hf_" + os.environ.get('HF_TOKEN', ''),  # Add HF token prefix
+                "huggingface_access_token": os.environ.get('HF_TOKEN', ''),
                 "batch_size": 8
             }
         )
