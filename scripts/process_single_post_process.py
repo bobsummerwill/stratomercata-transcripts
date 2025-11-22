@@ -26,7 +26,7 @@ def extract_transcriber_from_filename(filepath):
     """Parse transcriber name from intermediate filename."""
     filename = Path(filepath).stem
 
-    for service in ['whisperx', 'whisperx-cloud', 'assemblyai', 'deepgram', 'openai']:
+    for service in ['whisperx-cloud', 'whisperx', 'assemblyai', 'deepgram', 'openai']:
         if f'_{service}' in filename:
             basename = filename.replace(f'_{service}', '')
             return basename, service
@@ -314,8 +314,9 @@ def process_with_gemini(transcript, api_key, context):
     return result
 
 def process_with_groq(transcript, api_key, context):
-    """Process transcript using Llama 3.3 70B (via Groq) with streaming."""
-    model = "llama-3.3-70b-versatile"
+
+    """Process transcript using Llama 3.1 8B Instant (via Groq) with streaming."""
+    model = "llama-3.1-8b-instant"
     try:
         import openai
     except ImportError:
@@ -330,26 +331,31 @@ def process_with_groq(transcript, api_key, context):
     result = ""
     chunk_count = 0
 
-    stream = client.chat.completions.create(
-        model=model,
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=32000,  # Groq Llama 3.3 70B supports up to 32K output tokens
-        temperature=0.3,
-        stream=True
-    )
+    try:
+        stream = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=32000,  # Groq Llama 3.1 8B Instant supports up to 32K output tokens (128K context)
+            temperature=0.3,
+            stream=True
+        )
 
-    for chunk in stream:
-        if chunk.choices[0].delta.content:
-            result += chunk.choices[0].delta.content
-            chunk_count += 1
-            if chunk_count % 100 == 0:
-                print(".", end='', flush=True)
+        for chunk in stream:
+            if chunk.choices[0].delta.content:
+                result += chunk.choices[0].delta.content
+                chunk_count += 1
+                if chunk_count % 100 == 0:
+                    print(".", end='', flush=True)
 
-    print(" ✓")
-    return result
+        print(" ✓")
+        return result
+
+    except Exception as e:
+        print(f" {failure(f'Streaming failed: {e}')}")
+        raise
 
 def process_with_groq_qwen(transcript, api_key, context):
     """Process transcript using Qwen3 32B (via Groq) with streaming - MAXIMUM QUALITY - No cost/speed limits."""
@@ -491,7 +497,8 @@ def process_single_combination(transcript_path, provider, api_keys, context, oll
             corrected, new_ollama_process = process_with_qwen(transcript, context, ollama_process)
     except Exception as e:
         elapsed = time.time() - start_time
-        print(f"      {failure(f'Processing failed ({elapsed:.1f}s): {e}')}")
+        # Error details already printed by inner function, just show timing
+        print(f"      {failure(f'Processing failed ({elapsed:.1f}s)')}")
         
         # Clean up any partial files that may have been created
         for partial_file in [output_txt, output_md]:
