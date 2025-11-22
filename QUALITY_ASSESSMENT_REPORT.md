@@ -2,9 +2,11 @@
 
 **Date:** November 21, 2025
 **Assessed by:** AI Analysis
-**Files Analyzed:** All intermediate (raw ASR transcripts) and output (LLM-post-processed) files for Christoph Jentzsch interview (episode006) using WhisperX Cloud
-**Total Files:** 8 files (2 intermediate + 6 output)
-**Audio Source:** early-days-of-ethereum-episode-6-christoph-jentzsch (~90 minutes)
+**Files Analyzed:** All intermediate (raw ASR transcripts) and output (LLM-post-processed) files across multiple episodes
+**Total Files:** 28 files (8 intermediate + 20 output)
+**Audio Sources:**
+- **Episode006 - Christoph Jentzsch Interview:** ~90 minutes (4 LLM post-processors)
+- **Episode007 - Jacob Interview:** ~16 minutes (3 ASRs × 4 LLMs = 12 combinations)
 
 ---
 
@@ -32,13 +34,12 @@ This report evaluates the quality of the transcript processing pipeline for a si
 | **Combined Raw Transcripts** | ~3,700 lines total | ~46,100 words | ~313KB |
 
 #### Processed Output Files (After LLM Post-Processing)
-| LLM Service | Lines | Words | Compression Ratio | File Size | Filename |
-|-------------|--------|--------|------------------|-----------|----------|
-| **Anthropic Claude Sonnet** | 1,104 lines | ~23,500 words | 1.0x (slight expansion) | 189KB | `episode006-christoph-jentzsch_whisperx-cloud_whisperx-cloud_sonnet.txt` |
-| **OpenAI ChatGPT** | 812 lines | ~19,200 words | 0.83x (17% compression) | 143KB | `episode006-christoph-jentzsch_whisperx-cloud_whisperx-cloud_chatgpt.txt` |
-| **Google Gemini** | 1,588 lines | ~29,800 words | 1.29x (29% expansion) | 266KB | `episode006-christoph-jentzsch_whisperx-cloud_whisperx-cloud_gemini.txt` |
-| **Anthropic Claude Sonnet (Extra)** | N/A | N/A | N/A | N/A | `episode006-christoph-jentzsch-cloud_whisperx_sonnet.txt` |
-| **Combined Processed** | ~3,504 lines | ~72,500 words | ~1.08x avg | ~598KB | Files in `./outputs/` |
+| LLM Service | Lines | Words | Compression Ratio | File Size |
+|-------------|--------|--------|------------------|-----------|
+| **Anthropic Claude Sonnet (Christoph)** | 1,104 lines | ~23,500 words | 1.0x (slight expansion) | 189KB |
+| **OpenAI ChatGPT (Christoph)** | 812 lines | ~19,200 words | 0.83x (17% compression) | 143KB |
+| **Google Gemini (Christoph)** | 1,588 lines | ~29,800 words | 1.29x (29% expansion) | 266KB |
+| **Combined Christoph** | ~3,504 lines | ~72,500 words | ~1.08x avg | ~598KB |
 
 ---
 
