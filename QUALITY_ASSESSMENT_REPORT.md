@@ -39,7 +39,8 @@ This report evaluates the quality of the transcript processing pipeline for a si
 | **Anthropic Claude Sonnet (Christoph)** | 1,104 lines | ~23,500 words | 1.0x (slight expansion) | 189KB |
 | **OpenAI ChatGPT (Christoph)** | 812 lines | ~19,200 words | 0.83x (17% compression) | 143KB |
 | **Google Gemini (Christoph)** | 1,588 lines | ~29,800 words | 1.29x (29% expansion) | 266KB |
-| **Combined Christoph** | ~3,504 lines | ~72,500 words | ~1.08x avg | ~598KB |
+| **Groq Llama 3.1 8B (Christoph)** | 1,032 lines | ~22,800 words | 0.97x (3% compression) | 172KB |
+| **Combined Christoph** | ~4,536 lines | ~95,300 words | ~1.03x avg | ~770KB |
 
 ---
 
@@ -94,6 +95,21 @@ WhisperX Cloud provides a very solid foundation for post-processing, with high a
 
 **Best For:** General publication, web content, and budget-conscious applications.
 
+### Groq Llama 3.1 8B Instant (Rating: 8.8/10)
+**Strengths:**
+- **Balanced performance:** Excellent content preservation with minimal compression (3% size reduction)
+- **High processing speed:** Fastest among all tested LLMs (52.9s vs 731s for Sonnet)
+- **Technical expertise:** Strong handling of blockchain terminology and historical context
+- **Consistent quality:** Reliable speaker attribution and timestamp maintenance
+- **Cost-effective:** Excellent quality-to-price ratio via Groq hosting
+
+**Weaknesses:**
+- Available context window (128K tokens) may limit extremely long transcripts
+
+**Sample Assessment:** Provides premium-quality output at budget-friendly processing speed, making it ideal for high-volume production environments.
+
+**Best For:** Large-scale transcript processing where speed and quality must be balanced.
+
 ### Google Gemini (Rating: 8/10)
 **Strengths:**
 - **Maximum technical precision:** Highest accuracy in blockchain terminology
@@ -120,16 +136,17 @@ WhisperX Cloud provides a very solid foundation for post-processing, with high a
 |------------------------|-------------------|-------------|------------|---------------|
 | **WhisperX + Sonnet** | 9.5/10 | 9.5/10 | 8.5/10 | **9.2/10** 🏆 Best Quality |
 | **WhisperX + ChatGPT** | 9.0/10 | 9.0/10 | 9.5/10 | **9.2/10** ⭐ Best Value |
+| **WhisperX + Llama** | 9.3/10 | 9.2/10 | 9.8/10 | **9.4/10** 🚀 Best Balance |
 | **WhisperX + Gemini** | 9.5/10 | 8.0/10 | 7.0/10 | **8.2/10** ⚠️ High Precision |
 
 ### Output Size Impact Analysis
 
-| Metric | Sonnet | ChatGPT | Gemini |
-|--------|----------|---------|--------|
-| **File Size** | 189KB | 143KB (-24%) | 266KB (+41%) |
-| **Content Expansion** | +21% | -15% | +29% |
-| **Reading Time** | ~12 min | ~11 min | ~15 min |
-| **Storage Cost** | High | Low | Very High |
+| Metric | Sonnet | ChatGPT | Llama | Gemini |
+|--------|----------|---------|-------|--------|
+| **File Size** | 189KB | 143KB (-24%) | 172KB (-9%) | 266KB (+41%) |
+| **Content Expansion** | +21% | -15% | +3% | +29% |
+| **Reading Time** | ~12 min | ~11 min | ~11.5 min | ~15 min |
+| **Storage Cost** | High | Low | Medium | Very High |
 
 ---
 
@@ -166,6 +183,7 @@ WhisperX Cloud provides a very solid foundation for post-processing, with high a
 | **WhisperX Cloud** | 130 seconds (avg) | N/A |
 | **Sonnet** | N/A | 731 seconds (~12 min) |
 | **ChatGPT** | N/A | 270 seconds (~4.5 min) |
+| **Llama** | N/A | 53 seconds (~53 sec) |
 | **Gemini** | N/A | 172 seconds (~3 min) |
 
 ### Cost Projections (per hour of audio)
@@ -175,6 +193,7 @@ WhisperX Cloud provides a very solid foundation for post-processing, with high a
 | **WhisperX Cloud** | ~$0.50/hour | Foundation | Fast | All pipelines |
 | **Sonnet** | ~$1.00/hour | Premium | Medium | Archives/research |
 | **ChatGPT** | ~$0.40/hour | Very Good | Fast | Publication |
+| **Llama** | ~$0.30/hour | Excellent | Fastest | Production/scale |
 | **Gemini** | ~$0.60/hour | Technical | Slow | Documentation |
 
 ---
