@@ -8,31 +8,38 @@
 #   transcription with speaker diarization. Supports both NVIDIA GPU and
 #   CPU-only systems with automatic hardware detection.
 #
+# OPERATING SYSTEM SUPPORT:
+#   - macOS Sonoma (14.x)
+#   - Ubuntu 24.04 LTS
+#   Note: Script will fail immediately on any other OS or version
+#
 # HARDWARE SUPPORT:
 #   - NVIDIA GPUs: RTX 5070 Blackwell, RTX 50/40/30/20 series, GTX, Tesla
 #   - CPU-only: Any system without NVIDIA GPU (including AMD GPUs via CPU)
 #
 # WHAT IT DOES:
-#   1. Detects hardware (NVIDIA GPU vs CPU)
-#   2. Installs system dependencies (ffmpeg, build tools, Python dev)
-#   3. Creates isolated Python virtual environment
-#   4. Installs WhisperX and dependencies
-#   5. Installs PyTorch 2.9.0 (GPU or CPU)
-#   6. Verifies PyTorch installation
-#   7. Applies compatibility patches to WhisperX
-#   8. Installs pyannote.audio 4.0+
-#   9. Applies compatibility patches to SpeechBrain
-#  10. Configures LD_LIBRARY_PATH for NVIDIA
-#  11. Verifies package installations
-#  12. Installs AI provider SDKs (transcription & post-processing)
-#  13. Builds Ethereum glossaries
-#  14. Sets up environment configuration file
+#   1. Detects OS and version
+#   2. Detects hardware (NVIDIA GPU vs CPU)
+#   3. Installs system dependencies (ffmpeg, build tools, Python dev)
+#   4. Creates isolated Python virtual environment
+#   5. Installs WhisperX and dependencies
+#   6. Installs PyTorch 2.9.0 (GPU or CPU)
+#   7. Verifies PyTorch installation
+#   8. Applies compatibility patches to WhisperX
+#   9. Installs pyannote.audio 4.0+
+#  10. Applies compatibility patches to SpeechBrain
+#  11. Configures LD_LIBRARY_PATH for NVIDIA
+#  12. Verifies package installations
+#  13. Installs AI provider SDKs (transcription & post-processing)
+#  14. Builds Ethereum glossaries
+#  15. Sets up environment configuration file
 #
 # REQUIREMENTS:
-#   - Ubuntu 24.04 LTS (or compatible Debian-based system)
+#   - macOS Sonoma (14.x) OR Ubuntu 24.04 LTS
 #   - Python 3.12
-#   - For NVIDIA: Driver 565+ installed (run install_nvidia_drivers.sh first)
-#   - sudo access for system package installation
+#   - macOS: Homebrew installed (script will check and guide installation)
+#   - Ubuntu: sudo access for system package installation
+#   - For NVIDIA (Ubuntu): Driver 565+ installed (run install_nvidia_drivers.sh first)
 #
 # USAGE:
 #   ./install_packages_and_venv.sh                    # Auto-detect hardware
@@ -93,6 +100,84 @@ echo -e "${BLUE}========================================${NC}"
 echo ""
 
 # ==============================================================================
+# Step 0: OS Detection and Validation
+# ==============================================================================
+# Detect the operating system and version.
+# Only macOS Sonoma (14.x) and Ubuntu 24.04 LTS are supported.
+# Script will exit immediately if run on any other OS or version.
+# ==============================================================================
+echo -e "${YELLOW}[0/15] Detecting operating system...${NC}"
+
+OS_TYPE=""
+OS_VERSION=""
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    OS_TYPE="macos"
+    # Get macOS version
+    OS_VERSION=$(sw_vers -productVersion)
+    OS_MAJOR=$(echo "$OS_VERSION" | cut -d. -f1)
+    
+    echo "Detected macOS version: $OS_VERSION"
+    
+    if [ "$OS_MAJOR" -ne 14 ]; then
+        echo -e "${RED}ERROR: Unsupported macOS version${NC}"
+        echo "This script requires macOS Sonoma (14.x)"
+        echo "Your version: $OS_VERSION"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}✓ macOS Sonoma detected${NC}"
+    
+    # Check for Homebrew
+    if ! command -v brew &> /dev/null; then
+        echo -e "${RED}ERROR: Homebrew not installed${NC}"
+        echo "Homebrew is required for macOS installations."
+        echo "Install it from: https://brew.sh"
+        echo "Then run this script again."
+        exit 1
+    fi
+    echo -e "${GREEN}✓ Homebrew is installed${NC}"
+    
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    OS_TYPE="ubuntu"
+    
+    # Check if it's Ubuntu
+    if [ ! -f /etc/os-release ]; then
+        echo -e "${RED}ERROR: Cannot detect Linux distribution${NC}"
+        exit 1
+    fi
+    
+    source /etc/os-release
+    
+    if [ "$ID" != "ubuntu" ]; then
+        echo -e "${RED}ERROR: Unsupported Linux distribution${NC}"
+        echo "This script requires Ubuntu 24.04 LTS"
+        echo "Your distribution: $ID $VERSION_ID"
+        exit 1
+    fi
+    
+    echo "Detected Ubuntu version: $VERSION_ID"
+    
+    if [ "$VERSION_ID" != "24.04" ]; then
+        echo -e "${RED}ERROR: Unsupported Ubuntu version${NC}"
+        echo "This script requires Ubuntu 24.04 LTS"
+        echo "Your version: $VERSION_ID"
+        exit 1
+    fi
+    
+    echo -e "${GREEN}✓ Ubuntu 24.04 LTS detected${NC}"
+    
+else
+    echo -e "${RED}ERROR: Unsupported operating system${NC}"
+    echo "This script requires either:"
+    echo "  - macOS Sonoma (14.x)"
+    echo "  - Ubuntu 24.04 LTS"
+    exit 1
+fi
+
+echo ""
+
+# ==============================================================================
 # Step 1: Hardware Detection
 # ==============================================================================
 # Detect if an NVIDIA GPU is present to determine which PyTorch variant to install.
@@ -100,82 +185,139 @@ echo ""
 # Sets HAS_NVIDIA flag used throughout script for conditional logic.
 # Can be overridden with --force-cpu flag to force CPU-only installation.
 # ==============================================================================
-echo -e "${YELLOW}[1/14] Detecting hardware...${NC}"
+echo -e "${YELLOW}[1/15] Detecting hardware...${NC}"
 
 if [ "$FORCE_CPU" = true ]; then
     HAS_NVIDIA=false
     echo -e "${YELLOW}--force-cpu flag detected${NC}"
     echo -e "${YELLOW}⚠ Forcing CPU-only mode (ignoring any NVIDIA GPU)${NC}"
-    echo "Will install PyTorch nightly CPU-only version"
+    echo "Will install PyTorch 2.9.0 CPU-only version"
+elif [ "$OS_TYPE" = "macos" ]; then
+    HAS_NVIDIA=false
+    echo -e "${YELLOW}⚠ macOS detected - using CPU/MPS mode${NC}"
+    echo "Will install PyTorch 2.9.0 CPU-only version (Metal Performance Shaders supported)"
 elif command -v nvidia-smi &> /dev/null && nvidia-smi &> /dev/null; then
     HAS_NVIDIA=true
     GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null || echo "NVIDIA GPU")
     echo -e "${GREEN}✓ Detected NVIDIA GPU: $GPU_NAME${NC}"
-    echo "Will install PyTorch nightly with CUDA 13.0 support"
+    echo "Will install PyTorch 2.9.0 with CUDA 13.0 support"
 else
     HAS_NVIDIA=false
     echo -e "${YELLOW}⚠ No NVIDIA GPU detected - using CPU mode${NC}"
-    echo "Will install PyTorch nightly CPU-only version"
+    echo "Will install PyTorch 2.9.0 CPU-only version"
 fi
 echo ""
 
 # ==============================================================================
 # Step 2: System Dependencies and AI Tools Installation
 # ==============================================================================
-# Install required system packages and optional AI tools.
-# System packages: Build tools, audio processing, Python development
-# Optional AI tools: Ollama for local/private AI post-processing (FREE)
-# Requires sudo access for system-wide installation.
+# Install required system packages using appropriate package manager.
+# macOS: Uses Homebrew (brew)
+# Ubuntu: Uses apt package manager
+# These are low-level dependencies needed to build Python packages and process audio.
 # ==============================================================================
-echo -e "${YELLOW}[2/14] Installing system dependencies and AI tools...${NC}"
-echo "Installing required system packages:"
-echo "  - build-essential: C/C++ compilers for building Python packages"
-echo "  - ca-certificates: SSL/TLS certificates for secure connections"
-echo "  - curl: HTTP client for API requests"
-echo "  - ffmpeg: Audio/video processing for WhisperX"
-echo "  - git: Version control for installing packages from GitHub"
-echo "  - libcurl4-openssl-dev: cURL development libraries for Python packages"
-echo "  - libssl-dev: SSL development libraries"
-echo "  - python3-dev: Python headers for compiling extensions"
-echo "  - python3-pip: Python package installer"
-echo "  - python3-venv: Python virtual environment support"
-sudo apt update
-sudo apt install -y \
-  build-essential \
-  ca-certificates \
-  curl \
-  ffmpeg \
-  git \
-  libcurl4-openssl-dev \
-  libssl-dev \
-  python3-dev \
-  python3-pip \
-  python3-venv
-echo -e "${GREEN}✓ System dependencies installed${NC}"
+echo -e "${YELLOW}[2/15] Installing system dependencies...${NC}"
+
+if [ "$OS_TYPE" = "macos" ]; then
+    echo "Installing required packages via Homebrew:"
+    echo "  - ffmpeg: Audio/video processing for WhisperX"
+    echo "  - python@3.12: Python 3.12 interpreter"
+    echo "  - git: Version control for installing packages from GitHub"
+    
+    # Install packages if not already present
+    brew list ffmpeg &>/dev/null || brew install ffmpeg
+    brew list python@3.12 &>/dev/null || brew install python@3.12
+    brew list git &>/dev/null || brew install git
+    
+    # Set Python 3.12 from Homebrew as the python3 command
+    echo "Setting up Python 3.12 from Homebrew..."
+    export PATH="/opt/homebrew/opt/python@3.12/libexec/bin:$PATH"
+    
+    # Verify we're using the correct Python version
+    DETECTED_PY_VERSION=$(python3 --version)
+    echo "Using: $DETECTED_PY_VERSION"
+    
+    echo -e "${GREEN}✓ System dependencies installed${NC}"
+    
+elif [ "$OS_TYPE" = "ubuntu" ]; then
+    echo "Installing required system packages:"
+    echo "  - build-essential: C/C++ compilers for building Python packages"
+    echo "  - ca-certificates: SSL/TLS certificates for secure connections"
+    echo "  - curl: HTTP client for API requests"
+    echo "  - ffmpeg: Audio/video processing for WhisperX"
+    echo "  - git: Version control for installing packages from GitHub"
+    echo "  - libcurl4-openssl-dev: cURL development libraries for Python packages"
+    echo "  - libssl-dev: SSL development libraries"
+    echo "  - python3-dev: Python headers for compiling extensions"
+    echo "  - python3-pip: Python package installer"
+    echo "  - python3-venv: Python virtual environment support"
+    
+    sudo apt update
+    sudo apt install -y \
+      build-essential \
+      ca-certificates \
+      curl \
+      ffmpeg \
+      git \
+      libcurl4-openssl-dev \
+      libssl-dev \
+      python3-dev \
+      python3-pip \
+      python3-venv
+    
+    echo -e "${GREEN}✓ System dependencies installed${NC}"
+fi
 
 echo ""
+echo -e "${YELLOW}[3/15] Installing Ollama (optional AI tool)...${NC}"
 echo "Installing/upgrading Ollama for local AI post-processing (optional, FREE, private)..."
 if command -v ollama &> /dev/null; then
-    CURRENT_VERSION=$(ollama --version 2>/dev/null | grep -oP 'ollama version is \K[0-9.]+' || echo "unknown")
+    CURRENT_VERSION=$(ollama --version 2>/dev/null | sed -n 's/.*ollama version is \([0-9.]*\).*/\1/p' || echo "unknown")
     echo "Current version: $CURRENT_VERSION"
-    echo "Running Ollama installer to check for updates..."
+    echo "Checking for updates..."
 else
     echo "Installing Ollama..."
 fi
 
-# Always run installer - it handles upgrades and stops/restarts service automatically
-if curl -fsSL https://ollama.com/install.sh | sh; then
-    NEW_VERSION=$(ollama --version 2>/dev/null | grep -oP 'ollama version is \K[0-9.]+' || echo "unknown")
-    if [ "$CURRENT_VERSION" != "unknown" ] && [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
-        echo -e "${GREEN}✓ Ollama upgraded: $CURRENT_VERSION → $NEW_VERSION${NC}"
-    elif [ "$CURRENT_VERSION" = "$NEW_VERSION" ]; then
-        echo -e "${GREEN}✓ Ollama already at latest version: $NEW_VERSION${NC}"
+# Platform-specific installation
+if [ "$OS_TYPE" = "macos" ]; then
+    # macOS: Use Homebrew to install Ollama
+    if brew list ollama &>/dev/null; then
+        # Already installed, check for upgrade
+        if brew outdated ollama &>/dev/null; then
+            echo "Upgrading Ollama via Homebrew..."
+            brew upgrade ollama
+            NEW_VERSION=$(ollama --version 2>/dev/null | sed -n 's/.*ollama version is \([0-9.]*\).*/\1/p' || echo "unknown")
+            echo -e "${GREEN}✓ Ollama upgraded via Homebrew: $CURRENT_VERSION → $NEW_VERSION${NC}"
+        else
+            echo -e "${GREEN}✓ Ollama already at latest version (via Homebrew)${NC}"
+        fi
     else
-        echo -e "${GREEN}✓ Ollama installed (version: $NEW_VERSION)${NC}"
+        # Not installed, install it
+        if brew install ollama; then
+            NEW_VERSION=$(ollama --version 2>/dev/null | sed -n 's/.*ollama version is \([0-9.]*\).*/\1/p' || echo "unknown")
+            echo -e "${GREEN}✓ Ollama installed via Homebrew (version: $NEW_VERSION)${NC}"
+        else
+            echo -e "${YELLOW}⚠ Ollama installation via Homebrew failed (non-fatal)${NC}"
+            echo "  You can install it manually: brew install ollama"
+            echo "  Or download from: https://ollama.com/download/mac"
+        fi
     fi
-else
-    echo -e "${YELLOW}⚠ Ollama installation/upgrade failed (non-fatal)${NC}"
-    echo "  You can install it manually later: curl -fsSL https://ollama.com/install.sh | sh"
+elif [ "$OS_TYPE" = "ubuntu" ]; then
+    # Ubuntu: Use official installer script
+    if curl -fsSL https://ollama.com/install.sh | sh; then
+        NEW_VERSION=$(ollama --version 2>/dev/null | sed -n 's/.*ollama version is \([0-9.]*\).*/\1/p' || echo "unknown")
+        if [ "$CURRENT_VERSION" != "unknown" ] && [ "$NEW_VERSION" != "$CURRENT_VERSION" ]; then
+            echo -e "${GREEN}✓ Ollama upgraded: $CURRENT_VERSION → $NEW_VERSION${NC}"
+        elif [ "$CURRENT_VERSION" = "$NEW_VERSION" ]; then
+            echo -e "${GREEN}✓ Ollama already at latest version: $NEW_VERSION${NC}"
+        else
+            echo -e "${GREEN}✓ Ollama installed (version: $NEW_VERSION)${NC}"
+        fi
+    else
+        echo -e "${YELLOW}⚠ Ollama installation failed (non-fatal)${NC}"
+        echo "  You can install it manually: curl -fsSL https://ollama.com/install.sh | sh"
+    fi
 fi
 
 # Start Ollama service and pull default model
@@ -211,13 +353,13 @@ fi
 echo ""
 
 # ==============================================================================
-# Step 3: Python Virtual Environment Creation
+# Step 4: Python Virtual Environment Creation
 # ==============================================================================
 # Create an isolated Python environment to avoid conflicts with system packages.
 # If venv already exists, it's removed and recreated to ensure clean state.
 # All subsequent Python packages will be installed into this venv.
 # ==============================================================================
-echo -e "${YELLOW}[3/14] Creating Python virtual environment...${NC}"
+echo -e "${YELLOW}[4/15] Creating Python virtual environment...${NC}"
 echo "Creating isolated Python environment to avoid conflicts with system packages"
 echo "Location: $VENV_DIR"
 if [ -d "$VENV_DIR" ]; then
@@ -237,14 +379,14 @@ echo ""
 source "$VENV_DIR/bin/activate"
 
 # ==============================================================================
-# Step 4: Install Base Packages
+# Step 5: Install Base Packages
 # ==============================================================================
 # Installs WhisperX, AI provider SDKs, and dependencies from requirements.txt.
 # WhisperX will pull PyTorch 2.8.0, which we'll upgrade in the next step.
 # Includes transcription services (AssemblyAI, Deepgram, OpenAI)
 # and post-processing services (Anthropic, Google Gemini, OpenAI).
 # ==============================================================================
-echo -e "${YELLOW}[4/14] Installing base packages...${NC}"
+echo -e "${YELLOW}[5/15] Installing base packages...${NC}"
 echo "Installing WhisperX, AI provider SDKs, and dependencies from requirements.txt"
 echo "Note: WhisperX will pull PyTorch 2.8.0 (we'll upgrade to 2.9.0 next)"
 echo "This may take 5-10 minutes..."
@@ -253,37 +395,49 @@ echo -e "${GREEN}✓ Base packages installed${NC}"
 echo ""
 
 # ==============================================================================
-# Step 5: PyTorch Upgrade to 2.9.0 with CUDA 13.0
+# Step 6: PyTorch Upgrade to 2.9.0
 # ==============================================================================
-# Upgrades PyTorch from 2.8.0 (WhisperX default) to 2.9.0 with CUDA 13.0.
-# PyTorch 2.9.0 provides full Blackwell (sm_120) support for RTX 50-series GPUs.
-# CUDA 13.0 offers the latest optimizations and performance improvements.
-# Always install CUDA build - required for GPU acceleration.
-# Uses --force-reinstall to ensure correct CUDA variant is installed.
+# Upgrades PyTorch from 2.8.0 (WhisperX default) to 2.9.0.
+# PyTorch 2.9.0 provides:
+#   - Ubuntu: Full Blackwell (sm_120) support with CUDA 13.0 for RTX 50-series
+#   - macOS: Latest optimizations with MPS (Metal Performance Shaders) support
+# Both platforms use PyTorch 2.9.0 for version consistency.
+# Uses --force-reinstall to ensure correct variant is installed.
 # ==============================================================================
-echo -e "${YELLOW}[5/14] Upgrading PyTorch to 2.9.0 with CUDA 13.0...${NC}"
-echo "Upgrading PyTorch 2.8.0 → 2.9.0 with CUDA 13.0"
-echo "Provides full Blackwell (sm_120) support for RTX 50-series GPUs"
-echo "This may take 2-5 minutes depending on internet speed..."
-echo "Installing: PyTorch 2.9.0 with CUDA 13.0 support"
-pip install --force-reinstall --index-url https://download.pytorch.org/whl/cu130 \
-    torch==2.9.0 \
-    torchvision==0.24.0 \
-    torchaudio==2.9.0
-echo -e "${GREEN}✓ PyTorch 2.9.0+cu130 installed${NC}"
+echo -e "${YELLOW}[6/15] Upgrading PyTorch to 2.9.0...${NC}"
+echo "Upgrading PyTorch 2.8.0 → 2.9.0 for consistency across platforms"
+
+if [ "$OS_TYPE" = "ubuntu" ]; then
+    echo "Platform: Ubuntu - installing with CUDA 13.0 support"
+    echo "Provides full Blackwell (sm_120) support for RTX 50-series GPUs"
+    echo "This may take 2-5 minutes depending on internet speed..."
+    pip install --force-reinstall --index-url https://download.pytorch.org/whl/cu130 \
+        torch==2.9.0 \
+        torchvision==0.24.0 \
+        torchaudio==2.9.0
+    echo -e "${GREEN}✓ PyTorch 2.9.0+cu130 installed${NC}"
+else
+    echo "Platform: macOS - installing with MPS (Metal) support"
+    echo "This may take 2-5 minutes depending on internet speed..."
+    pip install --force-reinstall \
+        torch==2.9.0 \
+        torchaudio==2.9.0
+    echo -e "${GREEN}✓ PyTorch 2.9.0 installed${NC}"
+fi
 echo ""
 
 # ==============================================================================
-# Step 6: PyTorch Verification
+# Step 7: PyTorch Verification
 # ==============================================================================
 # Verifies PyTorch installation and hardware accessibility.
 # For NVIDIA: Confirms CUDA availability, GPU operations, and cuDNN functionality.
-# For CPU: Confirms basic CPU tensor operations work correctly.
+# For CPU/MPS: Confirms basic CPU tensor operations work correctly.
 # Ensures the installation is ready for machine learning workloads.
 # ==============================================================================
-echo -e "${YELLOW}[6/14] Verifying PyTorch installation...${NC}"
+echo -e "${YELLOW}[7/15] Verifying PyTorch installation...${NC}"
 echo "Verifying PyTorch installation and hardware access..."
-python3 -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'GPU: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"N/A\"}')"
+
+python3 -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA available: {torch.cuda.is_available()}'); print(f'MPS available: {torch.backends.mps.is_available() if hasattr(torch.backends, \"mps\") else False}'); print(f'Device: {torch.cuda.get_device_name(0) if torch.cuda.is_available() else \"CPU/MPS\"}')"
 
 if [ "$HAS_NVIDIA" = true ]; then
     if ! python3 -c "import torch; assert torch.cuda.is_available(), 'CUDA not available'" 2>/dev/null; then
@@ -302,6 +456,11 @@ else
     echo "Testing CPU operations..."
     python3 -c "import torch; x = torch.randn(100,100); print('✓ CPU test passed:', x.matmul(x).sum().item())"
     
+    if [ "$OS_TYPE" = "macos" ]; then
+        echo "Testing MPS (Metal) availability..."
+        python3 -c "import torch; print('✓ MPS available:', torch.backends.mps.is_available() if hasattr(torch.backends, 'mps') else False)"
+    fi
+    
     echo -e "${GREEN}✓ PyTorch verified - CPU ready${NC}"
 fi
 echo ""
@@ -313,12 +472,16 @@ echo ""
 # This enables compatibility with pyannote.audio 4.x API.
 # Patches are applied with sed and verified.
 # Files modified: vads/pyannote.py (global replace) and asr.py (line 412).
+# Note: sed syntax differs between macOS and Linux
 # ==============================================================================
-echo -e "${YELLOW}[7/14] Applying WhisperX patches...${NC}"
+echo -e "${YELLOW}[8/15] Applying WhisperX patches...${NC}"
 echo "Updating WhisperX to use 'token' parameter for HuggingFace authentication"
 echo "Enables compatibility with pyannote.audio 4.x"
-WHISPERX_VADS="$VENV_DIR/lib/python3.12/site-packages/whisperx/vads/pyannote.py"
-WHISPERX_ASR="$VENV_DIR/lib/python3.12/site-packages/whisperx/asr.py"
+
+# Find the actual site-packages directory (handles any Python version)
+SITE_PACKAGES=$(python3 -c "import site; print(site.getsitepackages()[0])")
+WHISPERX_VADS="$SITE_PACKAGES/whisperx/vads/pyannote.py"
+WHISPERX_ASR="$SITE_PACKAGES/whisperx/asr.py"
 
 if [ ! -f "$WHISPERX_VADS" ]; then
     echo -e "${RED}ERROR: WhisperX vads/pyannote.py not found at $WHISPERX_VADS${NC}"
@@ -330,9 +493,14 @@ if [ ! -f "$WHISPERX_ASR" ]; then
     exit 1
 fi
 
-# Apply patches
-sed -i 's/use_auth_token/token/g' "$WHISPERX_VADS"
-sed -i '412s/use_auth_token=None/token=None/' "$WHISPERX_ASR"
+# Apply patches (handling sed differences between macOS and Linux)
+if [ "$OS_TYPE" = "macos" ]; then
+    sed -i '' 's/use_auth_token/token/g' "$WHISPERX_VADS"
+    sed -i '' '412s/use_auth_token=None/token=None/' "$WHISPERX_ASR"
+else
+    sed -i 's/use_auth_token/token/g' "$WHISPERX_VADS"
+    sed -i '412s/use_auth_token=None/token=None/' "$WHISPERX_ASR"
+fi
 
 # Verify patches
 VADS_COUNT=$(grep -c "use_auth_token" "$WHISPERX_VADS" || true)
@@ -345,29 +513,29 @@ echo -e "${GREEN}✓ WhisperX patches applied successfully${NC}"
 echo ""
 
 # ==============================================================================
-# Step 8: pyannote.audio Installation
+# Step 9: pyannote.audio Installation
 # ==============================================================================
 # Installs pyannote.audio 4.0+, which provides PyTorch 2.9.0 compatibility.
 # Version 4.0+ is required to work with PyTorch 2.9.0's API and features.
 # ==============================================================================
-echo -e "${YELLOW}[8/14] Installing pyannote.audio 4.0+...${NC}"
+echo -e "${YELLOW}[9/15] Installing pyannote.audio 4.0+...${NC}"
 echo "Installing pyannote.audio 4.0+ for PyTorch 2.9.0 compatibility..."
 pip install --upgrade "pyannote.audio>=4.0.0"
 echo -e "${GREEN}✓ pyannote.audio 4.0+ installed${NC}"
 echo ""
 
 # ==============================================================================
-# Step 9: SpeechBrain Compatibility Patches
+# Step 10: SpeechBrain Compatibility Patches
 # ==============================================================================
 # Updates SpeechBrain to work with torchaudio 2.9.0's API.
 # Adds hasattr() check to gracefully handle different torchaudio versions.
 # This ensures SpeechBrain can detect available audio backends across versions.
 # ==============================================================================
-echo -e "${YELLOW}[9/14] Applying SpeechBrain compatibility patches...${NC}"
+echo -e "${YELLOW}[10/15] Applying SpeechBrain compatibility patches...${NC}"
 echo "Updating SpeechBrain for torchaudio 2.9.0 compatibility"
 echo "Adding version-agnostic audio backend detection"
 
-SPEECHBRAIN_BACKEND="$VENV_DIR/lib/python3.12/site-packages/speechbrain/utils/torch_audio_backend.py"
+SPEECHBRAIN_BACKEND="$SITE_PACKAGES/speechbrain/utils/torch_audio_backend.py"
 
 if [ ! -f "$SPEECHBRAIN_BACKEND" ]; then
     echo -e "${RED}ERROR: SpeechBrain torch_audio_backend.py not found at $SPEECHBRAIN_BACKEND${NC}"
@@ -442,13 +610,13 @@ rm -f /tmp/speechbrain_patch.py
 echo ""
 
 # ==============================================================================
-# Step 10: LD_LIBRARY_PATH Configuration (project-specific via setup_env.sh)
+# Step 11: LD_LIBRARY_PATH Configuration (project-specific via setup_env.sh)
 # ==============================================================================
 # Ensures setup_env.sh includes LD_LIBRARY_PATH for CUDA libraries
 # Project-specific (only active when setup_env.sh is sourced)
 # NOT added to ~/.bashrc to avoid global conflicts with other tools
 # ==============================================================================
-echo -e "${YELLOW}[10/14] Configuring LD_LIBRARY_PATH in setup_env.sh${NC}"
+echo -e "${YELLOW}[11/15] Configuring LD_LIBRARY_PATH in setup_env.sh${NC}"
 echo "Adding CUDA library paths to setup_env.sh (project-specific, not global)"
 
 if [ -f "$PROJECT_DIR/setup_env.sh" ]; then
@@ -466,13 +634,13 @@ fi
 echo ""
 
 # ==============================================================================
-# Step 11: Application Package Verification
+# Step 12: Application Package Verification
 # ==============================================================================
 # Verifies WhisperX and pyannote.audio can be imported successfully.
 # Import tests confirm all dependencies are properly installed and accessible.
 # This validation ensures the environment is ready for transcription tasks.
 # ==============================================================================
-echo -e "${YELLOW}[11/14] Verifying package installations...${NC}"
+echo -e "${YELLOW}[12/15] Verifying package installations...${NC}"
 echo "Testing imports to ensure all packages are properly installed and accessible"
 
 echo "Testing WhisperX import..."
@@ -485,12 +653,12 @@ echo -e "${GREEN}✓ All packages verified and ready to use${NC}"
 echo ""
 
 # ==============================================================================
-# Step 12: Verify AI Provider SDKs
+# Step 13: Verify AI Provider SDKs
 # ==============================================================================
 # Verifies that AI provider SDKs were installed from requirements.txt.
-# These packages were already installed in Step 4 along with WhisperX.
+# These packages were already installed in Step 5 along with WhisperX.
 # ==============================================================================
-echo -e "${YELLOW}[12/14] Verifying AI provider SDKs...${NC}"
+echo -e "${YELLOW}[13/15] Verifying AI provider SDKs...${NC}"
 echo "Verifying packages installed from requirements.txt:"
 echo "  Cloud transcription: assemblyai, deepgram-sdk, openai"
 echo "  AI post-processing: anthropic, google-generativeai"
@@ -508,13 +676,13 @@ echo -e "${GREEN}✓ All AI provider SDKs verified${NC}"
 echo ""
 
 # ==============================================================================
-# Step 13: Create Project Directories
+# Step 14: Create Project Directories
 # ==============================================================================
 # Create intermediates and outputs directories for transcript processing.
 # Ethereum glossaries (people/terms) are now generated on-demand during
 # post-processing rather than at install time, as they're only needed then.
 # ==============================================================================
-echo -e "${YELLOW}[13/14] Creating project directories...${NC}"
+echo -e "${YELLOW}[14/15] Creating project directories...${NC}"
 echo "Creating project directory structure..."
 mkdir -p "$PROJECT_DIR/intermediates"
 mkdir -p "$PROJECT_DIR/outputs"
@@ -525,13 +693,13 @@ echo "      Run scripts/extract_people.py or extract_terms.py manually if desire
 echo ""
 
 # ==============================================================================
-# Step 14: Environment File Setup
+# Step 15: Environment File Setup
 # ==============================================================================
 # Creates setup_env.sh from template if needed.
 # This file stores the HuggingFace token for downloading pyannote models.
 # User provides their token manually (see post-installation instructions).
 # ==============================================================================
-echo -e "${YELLOW}[14/14] Setting up environment configuration...${NC}"
+echo -e "${YELLOW}[15/15] Setting up environment configuration...${NC}"
 echo "Checking for setup_env.sh (required for HuggingFace authentication)"
 if [ ! -f "$PROJECT_DIR/setup_env.sh" ]; then
     if [ -f "$PROJECT_DIR/setup_env.sh.example" ]; then
@@ -558,7 +726,11 @@ echo "1. Get a HuggingFace token:"
 echo "   https://huggingface.co/settings/tokens"
 echo ""
 echo "2. Edit setup_env.sh and add your token:"
-echo "   nano setup_env.sh"
+if [ "$OS_TYPE" = "macos" ]; then
+    echo "   nano setup_env.sh  (or use your preferred editor)"
+else
+    echo "   nano setup_env.sh"
+fi
 echo ""
 echo "3. Accept model agreements:"
 echo "   - https://huggingface.co/pyannote/speaker-diarization-3.1"
@@ -567,7 +739,7 @@ echo ""
 echo -e "${YELLOW}OPTIONAL: Get API keys for remote AI providers${NC}"
 echo ""
 echo "4. For cloud-based AI providers (if not using local Ollama):"
-echo "   - OpenAI (ChatGPT-5): https://platform.openai.com/api-keys"
+echo "   - OpenAI (GPT-4.1): https://platform.openai.com/api-keys"
 echo "   - Anthropic (Claude): https://console.anthropic.com/"
 echo "   - Google (Gemini): https://makersuite.google.com/app/apikey"
 echo ""
