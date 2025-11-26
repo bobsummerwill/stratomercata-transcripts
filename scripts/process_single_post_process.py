@@ -322,8 +322,8 @@ def process_with_openai(transcript, api_key, context):
     return result
 
 def process_with_gemini(transcript, api_key, context):
-    """Process transcript using Gemini 2.5 Pro with streaming."""
-    model = "gemini-2.5-pro"
+    """Process transcript using Gemini 3 Pro Preview with streaming."""
+    model = "gemini-3-pro-preview"
     try:
         import google.generativeai as genai
     except ImportError:

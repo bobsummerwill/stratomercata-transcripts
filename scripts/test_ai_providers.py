@@ -9,19 +9,19 @@ import sys
 def test_gemini():
     """Test Google Gemini connection"""
     print("\n" + "="*60)
-    print("Testing GEMINI (gemini-2.5-pro)")
+    print("Testing GEMINI (gemini-3-pro-preview)")
     print("="*60)
-    
+
     api_key = os.environ.get('GOOGLE_API_KEY')
     if not api_key:
         print("❌ GOOGLE_API_KEY not set")
         return False
-    
+
     try:
         import google.generativeai as genai
         genai.configure(api_key=api_key)
-        
-        model = genai.GenerativeModel("gemini-2.5-pro")
+
+        model = genai.GenerativeModel("gemini-3-pro-preview")
         response = model.generate_content("Say 'hello' in one word")
         
         print(f"✅ Connected successfully")

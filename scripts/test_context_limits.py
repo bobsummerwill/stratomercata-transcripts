@@ -10,7 +10,7 @@ Tests actual context window limits for AI providers to determine:
 POST-PROCESSING PROVIDERS TESTED:
 - Sonnet (Claude Sonnet 4.5 via Anthropic)
 - ChatGPT (GPT-4o via OpenAI)
-- Gemini (Gemini 2.5 Pro via Google)
+- Gemini (Gemini 3 Pro Preview via Google)
 - Llama (Llama 3.3 70B via Groq)
 - Qwen (Qwen 2.5 7B via Ollama local)
 
@@ -254,30 +254,30 @@ def test_openai_context(test_sizes=[10000, 50000, 100000, 120000, 128000]):
     return results
 
 
-def test_gemini_context(test_sizes=[10000, 50000, 100000, 120000, 128000]):
-    """Test Gemini 2.5 Pro context limits"""
+def test_gemini_context(test_sizes=[10000, 50000, 100000, 500000, 1000000]):
+    """Test Gemini 3 Pro Preview context limits"""
     try:
         import google.generativeai as genai
     except ImportError:
         return {"error": "google-generativeai package not installed", "status": "skip"}
-    
+
     api_key = os.environ.get('GOOGLE_API_KEY')
     if not api_key:
         return {"error": "GOOGLE_API_KEY not set", "status": "skip"}
-    
-    print_info("Testing Google Gemini 2.5 Pro...")
+
+    print_info("Testing Google Gemini 3 Pro Preview...")
     genai.configure(api_key=api_key)
-    
+
     results = {
         "provider": "Google",
-        "model": "gemini-2.5-pro",
-        "advertised": "128,000 tokens (some claim 1M)",
+        "model": "gemini-3-pro-preview",
+        "advertised": "1,048,576 tokens (1M)",
         "tested": [],
         "max_working": 0,
         "status": "tested"
     }
-    
-    model = genai.GenerativeModel('gemini-2.5-pro')
+
+    model = genai.GenerativeModel('gemini-3-pro-preview')
     
     for size in test_sizes:
         print(f"  Testing {size:,} tokens...", end=" ", flush=True)
