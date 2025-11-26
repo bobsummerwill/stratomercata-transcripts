@@ -226,7 +226,7 @@ At the very end oh my goodness .
 At the very at
 the very end of at
 the very end of of December, kind of Christmas projects from both.
-January 2014, you had sort of like the the public announcements of the of Ethereum at the
+January 2014, he had sort of like the the public announcements of the of Ethereum at the
 the Bitcoin Miami
 conference.
 It was as early as April 2014
@@ -518,7 +518,7 @@ I found that I would get invited to any of 10
 video conferencing tools.
 And, like, you know, what is the Cisco one was the Webex .
 That was horrible.
-I would get that a lot.
+I would get that a lot .
 Google meetings didn't feel sufficiently corporate or something even though it was okay.
 And Zoom had the best quality for a while, and I found that everyone picked Zoom at the same time, like, 2018,
 
@@ -812,8 +812,7 @@ The complete thing .
 It's a it's a complete platform for decentralized applications end to end .
 This was the big mission .
 And, also, this was what attracted me to it .
-I mean, having someone having a really proud vision of a new Internet, if you want, that's what he called web three .
-That's where the term comes from because it was not just a little tool .
+I mean, having someone having a really proud vision of a new Internet, if you want, that's what he called web That's where the term comes from because it was not just a little tool .
 It was a complete new Internet called Web three from data to messaging
 to smart contract blockchains to IDE to browser.
 And this vision was very, very attractive .
@@ -979,11 +978,10 @@ And fully agree .
 And that's Yeah.
 The the the the problem with this is
 you only need it if you really need it .
-Meaning, if Uniswap failed, interface is not there .
+Meaning, if Uniswap failed, Interface is not there .
 It's like a backup .
 But it's not what you want to use daily .
-And if I say if you remember, maybe, q, you where they have one.
-When they presented MetaMask,
+And if I say if you remember, maybe, q, you where they have DefCon one, When they presented MetaMask,
 my first thought was, oh, this is totally away from the vision .
 Like, how can you not run a full node ?
 How can you how dare you, like, to just serve over RPCs and,
@@ -1066,7 +1064,7 @@ On the shares of the company or on the token ?
 This was the main reason all those companies had those nonprofit foundations in Switzerland.
 Rightfully so, because they said, you only want to have one cap table .
 Like the Ethereum Foundation, there was no shareholders of Ethereum .
-There was a nonprofit foundation and a token .
+Was a nonprofit foundation and a token .
 The token, if you want to have a share in the economic success of the protocol, you would buy ether .
 And so later on, there were many other token projects where they had a nonprofit foundation, so no shareholders, no second cap table, and then you would have only the token, and all the value would be there .
 And now with Uniswap, you have this problem of having, again, shareholders and tokens .
@@ -1129,9 +1127,9 @@ I actually think think two or two or three weeks after or maybe four, we had the
 Meaning there was some smart contract doing something that gas and c plus plus had a different result.
 Because for me, almost the middle of the light at 10PM or 11PM.
 So I remember seeing this, looking for one hour or so, finding what's the e what's the issue, then I found it, put a test about it.
-See if this bus was right, guess what's wrong .
+It was fast, was right, guess what's wrong .
 So I gave it to Jeff .
-They fixed us .
+They fixed it .
 I think we said one hour .
 In fact, after five hours, everything was done .
 And they basically called up the miners .
@@ -1316,8 +1314,7 @@ I think
 
 SPEAKER_02:
 so I remember, like, there was a dev p to p
-live p to p website
-that was released
+live p to p website that was released
 about that time .
 It still might have been after the giant change went in .
 So I I also we were working together regularly,
@@ -1525,7 +1522,7 @@ I actually remember
 trying to New York, talking to VCs there .
 Everybody said no .
 Then I met Joseph .
-He said yes .
+He said, yes .
 Maybe under some conditions.
 We just did not agree on the terms of detail at then, but I was presented at the Bitcoin meetup in New York, And they all like the first application was a Bitcoin application about arbitrage
 trading .
@@ -1592,8 +1589,8 @@ I think let's ask him if he wants to join us, and he did .
 And I think he was a very important part of making the DAO what it was .
 Later on, he did some messages, which I also didn't like .
 And so he felt a bit in disgrace what happened then .
-And I think the community was very, very hard with him because he was not
-always reacting maybe as he should in some situations after the hack .
+And I think the community was very, very hard with him because he was not always
+reacting maybe as he should in some situations after the hack .
 But, nevertheless, he played a very important part in the history of Ethereum and also, of course, of the DAO.
 
 SPEAKER_00:
@@ -1664,7 +1661,7 @@ It was all visions and thinking.
 And so this one reason why when we then did the DAO, the DAO was held like almost the first real thing you could do with Ethereum .
 That's why so many people jumped onto it and then the maybe just finishing this off, the narrative changed.
 It was not anymore a DAO for the universal share network, but maybe because of the creators we choose, which were, like, important figures in the Ethereum space and many other things, it turned into, an investment fund or, like, an index fund for Ethereum applications.
-Because now, like, after $20.30, 40,000,000 was in, it was clear this was not just money for Slockit and the USN.
+Because now, like, after twenty, thirty, forty million was in, it was clear this was not just money for Slockit and the USN.
 This was money for more cases and more people applied for it .
 It became like every
 decentralized application or many of them, not everyone, they're saying, I'm applying for getting funding from the DAO .
@@ -1704,7 +1701,6 @@ let's
 
 SPEAKER_03:
 can you hear me now ?
-Yeah .
 Yeah .
 I can hear you .
 I could always hear you .
@@ -1884,8 +1880,8 @@ and they have demos like
 a washing machine
 buying its own detergent
 and scheduling its own repair.
-So, so, yeah, that that that was happening a little earlier.
-And,
+So so, yeah, that that that was happening a little earlier.
+And
 and yeah .
 So, I mean,
 so Slockit itself did a number of these different products .
@@ -1993,8 +1989,8 @@ I remember becoming emotional because this was I did not expect this .
 I really expected, like, guy, you messed up Ethereum .
 Like, you almost lost it all .
 So I think this just speaks to the Ethereum community .
-How did we hit Stephan ?
-How did we hit me ?
+How they treated Stefan ?
+How they treated me ?
 Even though mistakes were made,
 Honest mistakes,
 at least from what I can tell.

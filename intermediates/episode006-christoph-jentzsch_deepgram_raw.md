@@ -226,7 +226,7 @@
 [512.5s] At the very at
 [517.3s] the very end of at
 [519.2s] the very end of of December, kind of Christmas projects from both.
-[523.7s] January 2014, you had sort of like the the public announcements of the of Ethereum at the
+[523.7s] January 2014, he had sort of like the the public announcements of the of Ethereum at the
 [530.2s] the Bitcoin Miami
 [531.7s] conference.
 [533.7s] It was as early as April 2014
@@ -412,9 +412,9 @@
 [957.1s] It mostly
 
 **SPEAKER_01:**
-[964.6s] Skype .
-[964.6s] We also had Skype channels for almost everything, like the c plus plus team and so on .
-[964.6s] Then I in a short time, they used the it was a notetaker,
+[964.7s] Skype .
+[964.7s] We also had Skype channels for almost everything, like the c plus plus team and so on .
+[964.7s] Then I in a short time, they used the it was a notetaker,
 [973.5s] which had a name also with e something
 [976.1s] where you could like Etherpad?
 [978.4s] Etherpad, something like this .
@@ -487,7 +487,7 @@
 **SPEAKER_03:**
 [1111.6s] Your technical problem Sorry .
 [1111.6s] I had some technical
-[1115.3s] problems for a while there.
+[1115.2s] problems for a while there.
 [1118.1s] But
 [1119.4s] I don't know .
 [1119.4s] I'm just listening to you guys .
@@ -518,8 +518,8 @@
 [1162.3s] video conferencing tools.
 [1164.9s] And, like, you know, what is the Cisco one was the Webex .
 [1164.9s] That was horrible.
-[1170.3s] I would get that a lot.
-[1172.0s] Google meetings didn't feel sufficiently corporate or something even though it was okay.
+[1170.3s] I would get that a lot .
+[1170.3s] Google meetings didn't feel sufficiently corporate or something even though it was okay.
 [1177.4s] And Zoom had the best quality for a while, and I found that everyone picked Zoom at the same time, like, 2018,
 
 **SPEAKER_00:**
@@ -812,8 +812,7 @@
 [1900.4s] It's a it's a complete platform for decentralized applications end to end .
 [1900.4s] This was the big mission .
 [1900.4s] And, also, this was what attracted me to it .
-[1900.4s] I mean, having someone having a really proud vision of a new Internet, if you want, that's what he called web three .
-[1900.4s] That's where the term comes from because it was not just a little tool .
+[1900.4s] I mean, having someone having a really proud vision of a new Internet, if you want, that's what he called web That's where the term comes from because it was not just a little tool .
 [1900.4s] It was a complete new Internet called Web three from data to messaging
 [1923.1s] to smart contract blockchains to IDE to browser.
 [1927.2s] And this vision was very, very attractive .
@@ -940,10 +939,10 @@
 [2200.0s] decentralized.
 
 **SPEAKER_01:**
-[2202.9s] Think we can have a miss too ?
-[2202.9s] I would love to see this .
-[2202.9s] I heard people thinking about this before .
-[2202.9s] I don't know if anybody really started the project, but
+[2202.8s] Think we can have a miss too ?
+[2202.8s] I would love to see this .
+[2202.8s] I heard people thinking about this before .
+[2202.8s] I don't know if anybody really started the project, but
 [2211.9s] it should be totally doable today .
 [2211.9s] It's not rocket science .
 [2211.9s] You know,
@@ -979,11 +978,10 @@
 [2287.4s] And that's Yeah.
 [2292.6s] The the the the problem with this is
 [2295.5s] you only need it if you really need it .
-[2295.5s] Meaning, if Uniswap failed, interface is not there .
+[2295.5s] Meaning, if Uniswap failed, Interface is not there .
 [2295.5s] It's like a backup .
 [2295.5s] But it's not what you want to use daily .
-[2295.5s] And if I say if you remember, maybe, q, you where they have one.
-[2307.1s] When they presented MetaMask,
+[2295.5s] And if I say if you remember, maybe, q, you where they have DefCon one, When they presented MetaMask,
 [2309.4s] my first thought was, oh, this is totally away from the vision .
 [2309.4s] Like, how can you not run a full node ?
 [2309.4s] How can you how dare you, like, to just serve over RPCs and,
@@ -1066,7 +1064,7 @@
 [2506.8s] This was the main reason all those companies had those nonprofit foundations in Switzerland.
 [2518.1s] Rightfully so, because they said, you only want to have one cap table .
 [2518.1s] Like the Ethereum Foundation, there was no shareholders of Ethereum .
-[2518.1s] There was a nonprofit foundation and a token .
+[2518.1s] Was a nonprofit foundation and a token .
 [2518.1s] The token, if you want to have a share in the economic success of the protocol, you would buy ether .
 [2518.1s] And so later on, there were many other token projects where they had a nonprofit foundation, so no shareholders, no second cap table, and then you would have only the token, and all the value would be there .
 [2518.1s] And now with Uniswap, you have this problem of having, again, shareholders and tokens .
@@ -1129,9 +1127,9 @@
 [2692.5s] Meaning there was some smart contract doing something that gas and c plus plus had a different result.
 [2706.0s] Because for me, almost the middle of the light at 10PM or 11PM.
 [2710.4s] So I remember seeing this, looking for one hour or so, finding what's the e what's the issue, then I found it, put a test about it.
-[2717.7s] See if this bus was right, guess what's wrong .
+[2717.7s] It was fast, was right, guess what's wrong .
 [2717.7s] So I gave it to Jeff .
-[2717.7s] They fixed us .
+[2717.7s] They fixed it .
 [2717.7s] I think we said one hour .
 [2717.7s] In fact, after five hours, everything was done .
 [2717.7s] And they basically called up the miners .
@@ -1316,8 +1314,7 @@
 
 **SPEAKER_02:**
 [3117.8s] so I remember, like, there was a dev p to p
-[3121.4s] live p to p website
-[3123.3s] that was released
+[3121.4s] live p to p website that was released
 [3124.8s] about that time .
 [3124.8s] It still might have been after the giant change went in .
 [3124.8s] So I I also we were working together regularly,
@@ -1525,7 +1522,7 @@
 [3646.0s] trying to New York, talking to VCs there .
 [3646.0s] Everybody said no .
 [3646.0s] Then I met Joseph .
-[3646.0s] He said yes .
+[3646.0s] He said, yes .
 [3646.0s] Maybe under some conditions.
 [3653.3s] We just did not agree on the terms of detail at then, but I was presented at the Bitcoin meetup in New York, And they all like the first application was a Bitcoin application about arbitrage
 [3664.1s] trading .
@@ -1592,9 +1589,9 @@
 [3808.5s] And I think he was a very important part of making the DAO what it was .
 [3808.5s] Later on, he did some messages, which I also didn't like .
 [3808.5s] And so he felt a bit in disgrace what happened then .
-[3808.5s] And I think the community was very, very hard with him because he was not
-[3828.3s] always reacting maybe as he should in some situations after the hack .
-[3828.3s] But, nevertheless, he played a very important part in the history of Ethereum and also, of course, of the DAO.
+[3808.5s] And I think the community was very, very hard with him because he was not always
+[3828.8s] reacting maybe as he should in some situations after the hack .
+[3828.8s] But, nevertheless, he played a very important part in the history of Ethereum and also, of course, of the DAO.
 
 **SPEAKER_00:**
 [3838.4s] And and so so DEFCON
@@ -1664,7 +1661,7 @@
 [3979.0s] And so this one reason why when we then did the DAO, the DAO was held like almost the first real thing you could do with Ethereum .
 [3979.0s] That's why so many people jumped onto it and then the maybe just finishing this off, the narrative changed.
 [3992.6s] It was not anymore a DAO for the universal share network, but maybe because of the creators we choose, which were, like, important figures in the Ethereum space and many other things, it turned into, an investment fund or, like, an index fund for Ethereum applications.
-[4007.1s] Because now, like, after $20.30, 40,000,000 was in, it was clear this was not just money for Slockit and the USN.
+[4007.1s] Because now, like, after twenty, thirty, forty million was in, it was clear this was not just money for Slockit and the USN.
 [4013.7s] This was money for more cases and more people applied for it .
 [4013.7s] It became like every
 [4019.3s] decentralized application or many of them, not everyone, they're saying, I'm applying for getting funding from the DAO .
@@ -1704,7 +1701,6 @@
 
 **SPEAKER_03:**
 [4087.4s] can you hear me now ?
-[4087.4s] Yeah .
 [4087.4s] Yeah .
 [4087.4s] I can hear you .
 [4087.4s] I could always hear you .
@@ -1884,8 +1880,8 @@
 [4521.7s] a washing machine
 [4524.7s] buying its own detergent
 [4527.6s] and scheduling its own repair.
-[4533.2s] So, so, yeah, that that that was happening a little earlier.
-[4537.1s] And,
+[4533.2s] So so, yeah, that that that was happening a little earlier.
+[4537.1s] And
 [4538.1s] and yeah .
 [4538.1s] So, I mean,
 [4540.8s] so Slockit itself did a number of these different products .
@@ -1911,7 +1907,7 @@
 [4591.9s] We built most of their stuff in 2018,
 [4604.9s] '19,
 [4606.7s] until they hired their own developers.
-[4608.8s] Gethermind was also part of this a while.
+[4608.9s] Gethermind was also part of this a while.
 [4612.4s] So, yes, this was still I mean, if you remember this time, you say that there was so much enterprise interest,
 [4617.8s] enterprise at the time, we're just learning, looking into this, wants to build prototypes,
 [4622.9s] not yet production stuff.
@@ -1993,8 +1989,8 @@
 [4840.9s] I really expected, like, guy, you messed up Ethereum .
 [4840.9s] Like, you almost lost it all .
 [4840.9s] So I think this just speaks to the Ethereum community .
-[4840.9s] How did we hit Stephan ?
-[4840.9s] How did we hit me ?
+[4840.9s] How they treated Stefan ?
+[4840.9s] How they treated me ?
 [4840.9s] Even though mistakes were made,
 [4860.9s] Honest mistakes,
 [4862.4s] at least from what I can tell.
