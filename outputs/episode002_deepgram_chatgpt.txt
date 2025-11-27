@@ -1,0 +1,117 @@
+**SPEAKER_00:**
+Alright.
+Well, welcome back, everybody.
+The first episode of the early days of Ethereum actually got quite good critical reception on LinkedIn and Twitter.
+I have a total of nine YouTube subscribers now, which I think is not so bad for our first video.
+And there have been a few people who reached out who we've known a long time who really appreciated the content.
+One of them called it, you know, essential viewing.
+So, anyway, we're back for another episode.
+So remind everybody, I'm Kieran James, CEO of BlockApps, here with my cofounders.
+Victor, do you wanna introduce yourself quickly?
+
+**SPEAKER_01:**
+Oh, okay.
+I'm Victor Wong, cofounder and Chief Product Officer of BlockApps.
+
+**SPEAKER_02:**
+I'm James—Jim, CTO and cofounder of BlockApps.
+
+**SPEAKER_00:**
+Alright. Thank you.
+And so I believe where we left—so I can't watch video of myself, so I forget exactly how we ended the last episode, but I believe we pretty much ended with the Ethereum launch.
+And there were some things we left out even prior to launch that we can kinda backtrack to a little bit and then go forward to all of the kind of after-launch activity.
+So with that said, maybe I'll hand it to Victor to talk about the first ConsenSys Dappathon, which was June 2015, I believe?
+
+**SPEAKER_01:**
+Yeah.
+So that was, I think, the first actual hackathon building, you know, what in those days were known as dapps.
+I guess some people still call it that, but that seems to have gone out of favor in favor of "blockchain applications."
+So the first idea was to really try to build blockchain applications directly on Ethereum.
+And that was in the first ConsenSys office, which was like a very small coworking space in, like, Greenpoint, I think.
+
+**SPEAKER_00:**
+Yeah. Heard. It was called Green Desk, maybe?
+
+**SPEAKER_02:**
+Green Desk. Yeah, that's right.
+It's right next to the modern-day Domino Park, maybe a block away from there.
+Exactly. Yeah, that's right.
+Of course, Domino Park did not exist at that time.
+In fact, Domino Park went up really quickly and took me by surprise.
+I looked up one day, and there was a big, kind of well-manicured park there.
+They kind of walled it off, and so it just was like—I don't know.
+I thought it was an abandoned site.
+And then one day, all of a sudden, the wall was gone, and there was a beautiful park there.
+
+**SPEAKER_01:**
+So at that event, which was, I think, two to three months before the actual launch of Ethereum, I will say the concepts were really interesting.
+People were coming up, and it was mostly, I think, interns that were interning at ConsenSys over that summer.
+And ConsenSys at this point was only, like, maybe 20 people at max.
+Like, it was really, really small.
+And, you know, some great concepts came up, but even with the stuff we built, we realized pretty quickly that no one could build anything in a short period of time.
+Like, it was just impossible.
+Very basic stuff, like reading a variable off the blockchain, was kind of impossible.
+Like, you couldn't read the state off the blockchain—all of this kind of stuff.
+So that kind of led into—yeah, like, everything building in those days was incredibly hard.
+And that led into—so we decided at that event we were going to, at the launch of Ethereum, do a bigger hackathon.
+And that became the second ConsenSys Dappathon, which coincided with the launch of Ethereum.
+And it was us, the Java client, which I think was called EtherCamp at that time, and other tools that were kind of combined together.
+But what was really interesting about that one was, you know, it was bigger.
+Like, I think the first one, we had, like, six participants.
+The other one, we had, I think, close to 30.
+But it introduced a lot of ideas that would become more developed pretty quickly.
+Like, the winner was a GameFi app.
+Like, it really had that element of tokenized gameplay.
+There was a decentralized social app, I think, called Truther or something like that.
+And then there was a traceability supply chain app in those early days, and that kind of all coincided with the launch of Ethereum.
+
+**SPEAKER_00:**
+Yeah. So, okay. So you're talking about the second one?
+
+**SPEAKER_01:**
+I'm talking about the second one. Yeah.
+
+**SPEAKER_00:**
+The second one, also, the offices had shifted.
+So ConsenSys, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is—I believe they still have a presence there, though they've gone mostly remote.
+I remember there was, like, a horse lineage app.
+Yeah. Pretty interesting.
+And we ended up actually hiring a couple people who participated in the hackathon.
+But that one was open to externals, right?
+So that was the big difference.
+And it actually was, you know, quite well attended.
+The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall.
+And you think that one was, like, 24 hours, or it was two days? I can't remember.
+
+**SPEAKER_01:**
+It was two days.
+And, yeah, like, the air conditioning thing—so we moved into that space to have the hackathon.
+Like, you know, ConsenSys was blank because they had outgrown that coworking space already.
+And so we moved into that space, which—yeah, it was a reasonably sized room.
+Like, you could probably get 80 to 100 people in that room, right?
+But, yes, the air conditioning was terrible, and we had to frantically—we only realized this after we got into the room, so we had to, like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+Okay. I do have a memory of that.
+I don't know if you recall that, but, yeah, we were, like, trying to get those air conditioning units in place before, like, a ton of people showed up.
+Because, yeah, like, we were sweating when there were only, like, five people in the room.
+
+**SPEAKER_01:**
+These were the scrappy days.
+Manually configuring air conditioning.
+I think the amount of, like, furniture assembly that you do is, like, a good proxy for how scrappy you are in your startup journey.
+
+**SPEAKER_00:**
+There was a lot of furniture.
+I mean, we kept—like, it was basically an empty room when we moved in there.
+And I think we moved in there a day or two before the hackathon actually started, so we had to get everything up and running.
+And it was this to, like, sort of commemorate the launch, I think? Or was it, like, right before the launch?
+
+**SPEAKER_01:**
+It was—it actually—you know, if you recall at the time, we didn't know when the launch would be.
+Like, the dates were always shifting, right?
+And we just said—we can't—we arbitrarily chose—like, we wanted to actually synchronize it with the launch, but because we couldn't know exactly when the launch was.
+And even when they declared the date, it was still a little bit vague.
+Like, we're like, is that gonna actually happen?
+So we kind of, at some point, had to arbitrarily choose the date, and they more or less—it was the right date.
+Like, I think it was off by maybe a day or two.
