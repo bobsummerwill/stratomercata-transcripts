@@ -1,0 +1,332 @@
+**SPEAKER_00:**
+[00:00] All right, well, welcome back, everybody. The first episode of the early days of Ethereum actually got quite good critical reception on LinkedIn and Twitter. I have a total of nine YouTube subscribers now, which I think is not so bad for a first video. And there have been a few people who reached out, who we've known a long time who really appreciated the content. One of them called it, you know, essential viewing. So anyway, we're back for another episode, so remind everybody. I'm KIERAN James Lubin, CEO of BlockApps, here with my co-founders, Victor. Do you want to introduce yourself quickly?
+
+**SPEAKER_01:**
+[00:01] Oh, okay. I'm Victor Wong, co-founder and chief product officer of Block Apps.
+
+**SPEAKER_02:**
+[00:02] I'm James Hermos DIA or Jim, CTO and founder, co-founder of BlockApps.
+
+**SPEAKER_00:**
+[00:03] All right, thank you. And so I believe where we left... So I can't watch video of myself, so I forget exactly how we ended the last episode, but I believe we pretty much ended with the Ethereum launch. And there were some things we left out even prior to launch that we can kind of backtrack to a little bit and then go forward to all of the kind of after launch activity. So with that said, maybe I'll hand it to Victor to talk about the first consensus Dapathon, which was June 2015, I believe.
+
+**SPEAKER_01:**
+[00:04] Yeah, so that was, I think, the first actual hackathon building... You know, what, what we, what in those days were known as dapps, I guess some people still call it, but that seems to go on out of favor with blockchain applications. So the first idea was to really try to build blockchain applications directly on Ethereum. And that was in the first consensus office, which was like a very small co-working space in like Greenpoint, I.
+
+**SPEAKER_00:**
+[00:05] Think it was water in. It was called Green desks, maybe green ducks.
+
+**SPEAKER_01:**
+[00:06] Yeah, that's right.
+
+**SPEAKER_02:**
+[00:07] Yeah, it's right next to the modern day Domino park, maybe a block away from there or so.
+
+**SPEAKER_00:**
+[00:08] Exactly. Yeah, that's right. So and it of course, Domino park did not exist at that time. In fact, Domino park went up really quickly and took me by surprise. I like looked up one day and there was like a big kind of well manicured park there.
+
+**SPEAKER_01:**
+[00:09] So at that, so at that event, you know, which was I think two months, two to three months before the actual launch of Ethereum, I... I will say not... The concepts were really interesting. People were coming up, and it was mostly, I think, interns that were interning... A consensus over that summer. And consensus at this point was only like, maybe 20 people at max.
+
+**SPEAKER_00:**
+[00:10] 20 or 30.
+
+**SPEAKER_01:**
+[00:11] Yeah, it was really, really small. And, you know, some great concepts came up. But, like, even with the stuff we built, we realized pretty quickly that no one could build anything in a short period of time. Like, it was just impossible. Like, very basic stuff, like reading a variable off the blockchain was kind of impossible. Like, you could read the state off the blockchain, all this kind of stuff. So that kind of led into... Yeah, like, everything building in those days were incredibly hard. And that led into... So we decided at that event we were going to... At the launch of Ethereum, we were going to do a bigger hackathon. And that became the second consensus Dappathon, which kind of coincided with the launch of Ethereum. And it was us, you know, the Java client, which I think was called Ethercap at that time, and, like, other tools that were kind of combined together. But what was really interesting about that one was, you know, it was bigger. Like, I think the first one we had like six participants. The other one we had, like, I think close to 30. And... But it introduced, like, a lot of ideas that would become more developed pretty quickly. Like, the winner was a gamefi app. Like, it really had that... That element of tokenized gameplay. There was a decentralized social app, I think, called Truther or something. Some... Something like that. And then there was like a traceability supply chain app in those early days. And that kind of all coincided with, like, the launch of Ethereum.
+
+**SPEAKER_00:**
+[00:12] Yeah. So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[00:13] I'm talking about the second one.
+
+**SPEAKER_00:**
+[00:14] Yeah, the second one. Also, the offices had shifted. So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote. I remember there was like a... There's like a horse Lineage app. Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon. But that one was open to externals. Right. So that was the big difference. And it actually was, you know, quite well attended. The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall. And you think that one was like 24 hours or it was two days. I can't remember.
+
+**SPEAKER_01:**
+[00:15] I think it was two days. And yeah, like the air conditioning thing... So we move... Moved into that space to have the hackathon, like, you know, consensus was playing because they had outgrown that co-working space already. And so we moved into that space, which can, you know, was a reasonably sized room. Like, you could probably get 80 to 100 people in that room. Right. But yes, the air conditioning was terrible and we had to frantically... We only realized this after we got into the room, so we had to like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+[00:16] Okay, I do have a memory of that.
+
+**SPEAKER_01:**
+[00:17] Yeah, I don't know if you recall that, but yeah, we were like, trying to like, get those air conditioning units in place before a ton of people showed up because, yeah, like, we were sweating when there were only like five people in the room.
+
+**SPEAKER_00:**
+[00:18] These were the scrappy days.
+
+**SPEAKER_01:**
+[00:19] Yeah.
+
+**SPEAKER_00:**
+[00:20] Manually configuring air conditioning... I think the amount of like, furniture assembly that you do is like a good proxy for you are in... In your startup journey.
+
+**SPEAKER_01:**
+[00:21] There was a lot of furniture... I mean, we, we like... It was basically an empty room when we moved in there. And I think we moved in there a day or two before the hackathon actually started. So get everything running.
+
+**SPEAKER_00:**
+[00:22] And was this to like, sort of commemorate the launch, I think, or was it like right before the launch?
+
+**SPEAKER_01:**
+[00:23] It was, it was, it was right... It actually, you know, if you recall, at the time, we didn't know when the launch would be. Like, the... The dates were always shifting. Right. And we just said we kind of arbitrarily chose, like, we wanted to actually synchronize it with the launch, but because it was... Because we couldn't know exactly when the launch was, and even when they declared the date, it was still a little bit vague. Like, we were like, is that going to actually happen? So we... We kind of at some point had to arbitrarily chose the date and they... They more or less... What was the right date? Like, I think it was off by maybe a day or two.
+
+**SPEAKER_00:**
+[00:24] Yeah... So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[00:25] I'm talking about the second one.
+
+**SPEAKER_00:**
+[00:26] Yeah, the second one... Also, the offices had shifted... So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote... I remember there was like a... There's like a horse Lineage app... Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon... But that one was open to externals... Right... So that was the big difference... And it actually was, you know, quite well attended... The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall... And you think that one was like 24 hours or it was two days... I can't remember.
+
+**SPEAKER_01:**
+[00:27] I think it was two days... And yeah, like the air conditioning thing... So we move... Moved into that space to have the hackathon, like, you know, consensus was playing because they had outgrown that co-working space already... And so we moved into that space, which can, you know, was a reasonably sized room... Like, you could probably get 80 to 100 people in that room... Right... But yes, the air conditioning was terrible and we had to frantically... We only realized this after we got into the room, so we had to like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+[00:28] Okay, I do have a memory of that.
+
+**SPEAKER_01:**
+[00:29] Yeah, I don't know if you recall that, but yeah, we were like, trying to like, get those air conditioning units in place before a ton of people showed up because, yeah, like, we were sweating when there were only like five people in the room.
+
+**SPEAKER_00:**
+[00:30] These were the scrappy days.
+
+**SPEAKER_01:**
+[00:31] Yeah.
+
+**SPEAKER_00:**
+[00:32] Manually configuring air conditioning... I think the amount of like, furniture assembly that you do is like a good proxy for you are in... In your startup journey.
+
+**SPEAKER_01:**
+[00:33] There was a lot of furniture... I mean, we, we like... It was basically an empty room when we moved in there... And I think we moved in there a day or two before the hackathon actually started... So get everything running.
+
+**SPEAKER_00:**
+[00:34] And was this to like, sort of commemorate the launch, I think, or was it like right before the launch?
+
+**SPEAKER_01:**
+[00:35] It was, it was, it was right... It actually, you know, if you recall, at the time, we didn't know when the launch would be... Like, the... The dates were always shifting... Right... And we just said we kind of arbitrarily chose, like, we wanted to actually synchronize it with the launch, but because it was... Because we couldn't know exactly when the launch was, and even when they declared the date, it was still a little bit vague... Like, we were like, is that going to actually happen? So we... We kind of at some point had to arbitrarily chose the date and they... They more or less... What was the right date? Like, I think it was off by maybe a day or two.
+
+**SPEAKER_00:**
+[00:36] Yeah... So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[00:37] I'm talking about the second one.
+
+**SPEAKER_00:**
+[00:38] Yeah, the second one... Also, the offices had shifted... So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote... I remember there was like a... There's like a horse Lineage app... Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon... But that one was open to externals... Right... So that was the big difference... And it actually was, you know, quite well attended... The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall... And you think that one was like 24 hours or it was two days... I can't remember.
+
+**SPEAKER_01:**
+[00:39] I think it was two days... And yeah, like the air conditioning thing... So we move... Moved into that space to have the hackathon, like, you know, consensus was playing because they had outgrown that co-working space already... And so we moved into that space, which can, you know, was a reasonably sized room... Like, you could probably get 80 to 100 people in that room... Right... But yes, the air conditioning was terrible and we had to frantically... We only realized this after we got into the room, so we had to like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+[00:40] Okay, I do have a memory of that.
+
+**SPEAKER_01:**
+[00:41] Yeah, I don't know if you recall that, but yeah, we were like, trying to like, get those air conditioning units in place before a ton of people showed up because, yeah, like, we were sweating when there were only like five people in the room.
+
+**SPEAKER_00:**
+[00:42] These were the scrappy days.
+
+**SPEAKER_01:**
+[00:43] Yeah.
+
+**SPEAKER_00:**
+[00:44] Manually configuring air conditioning... I think the amount of like, furniture assembly that you do is like a good proxy for you are in... In your startup journey.
+
+**SPEAKER_01:**
+[00:45] There was a lot of furniture... I mean, we, we like... It was basically an empty room when we moved in there... And I think we moved in there a day or two before the hackathon actually started... So get everything running.
+
+**SPEAKER_00:**
+[00:46] And was this to like, sort of commemorate the launch, I think, or was it like right before the launch?
+
+**SPEAKER_01:**
+[00:47] It was, it was, it was right... It actually, you know, if you recall, at the time, we didn't know when the launch would be... Like, the... The dates were always shifting... Right... And we just said we kind of arbitrarily chose, like, we wanted to actually synchronize it with the launch, but because it was... Because we couldn't know exactly when the launch was, and even when they declared the date, it was still a little bit vague... Like, we were like, is that going to actually happen? So we... We kind of at some point had to arbitrarily chose the date and they... They more or less... What was the right date? Like, I think it was off by maybe a day or two.
+
+**SPEAKER_00:**
+[00:48] Yeah... So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[00:49] I'm talking about the second one.
+
+**SPEAKER_00:**
+[00:50] Yeah, the second one... Also, the offices had shifted... So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote... I remember there was like a... There's like a horse Lineage app... Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon... But that one was open to externals... Right... So that was the big difference... And it actually was, you know, quite well attended... The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall... And you think that one was like 24 hours or it was two days... I can't remember.
+
+**SPEAKER_01:**
+[00:51] I think it was two days... And yeah, like the air conditioning thing... So we move... Moved into that space to have the hackathon, like, you know, consensus was playing because they had outgrown that co-working space already... And so we moved into that space, which can, you know, was a reasonably sized room... Like, you could probably get 80 to 100 people in that room... Right... But yes, the air conditioning was terrible and we had to frantically... We only realized this after we got into the room, so we had to like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+[00:52] Okay, I do have a memory of that.
+
+**SPEAKER_01:**
+[00:53] Yeah, I don't know if you recall that, but yeah, we were like, trying to like, get those air conditioning units in place before a ton of people showed up because, yeah, like, we were sweating when there were only like five people in the room.
+
+**SPEAKER_00:**
+[00:54] These were the scrappy days.
+
+**SPEAKER_01:**
+[00:55] Yeah.
+
+**SPEAKER_00:**
+[00:56] Manually configuring air conditioning... I think the amount of like, furniture assembly that you do is like a good proxy for you are in... In your startup journey.
+
+**SPEAKER_01:**
+[00:57] There was a lot of furniture... I mean, we, we like... It was basically an empty room when we moved in there... And I think we moved in there a day or two before the hackathon actually started... So get everything running.
+
+**SPEAKER_00:**
+[00:58] And was this to like, sort of commemorate the launch, I think, or was it like right before the launch?
+
+**SPEAKER_01:**
+[00:59] It was, it was, it was right... It actually, you know, if you recall, at the time, we didn't know when the launch would be... Like, the... The dates were always shifting... Right... And we just said we kind of arbitrarily chose, like, we wanted to actually synchronize it with the launch, but because it was... Because we couldn't know exactly when the launch was, and even when they declared the date, it was still a little bit vague... Like, we were like, is that going to actually happen? So we... We kind of at some point had to arbitrarily chose the date and they... They more or less... What was the right date? Like, I think it was off by maybe a day or two.
+
+**SPEAKER_00:**
+[01:00] Yeah... So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[01:01] I'm talking about the second one.
+
+**SPEAKER_00:**
+[01:02] Yeah, the second one... Also, the offices had shifted... So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote... I remember there was like a... There's like a horse Lineage app... Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon... But that one was open to externals... Right... So that was the big difference... And it actually was, you know, quite well attended... The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall... And you think that one was like 24 hours or it was two days... I can't remember.
+
+**SPEAKER_01:**
+[01:03] I think it was two days... And yeah, like the air conditioning thing... So we move... Moved into that space to have the hackathon, like, you know, consensus was playing because they had outgrown that co-working space already... And so we moved into that space, which can, you know, was a reasonably sized room... Like, you could probably get 80 to 100 people in that room... Right... But yes, the air conditioning was terrible and we had to frantically... We only realized this after we got into the room, so we had to like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+[01:04] Okay, I do have a memory of that.
+
+**SPEAKER_01:**
+[01:05] Yeah, I don't know if you recall that, but yeah, we were like, trying to like, get those air conditioning units in place before a ton of people showed up because, yeah, like, we were sweating when there were only like five people in the room.
+
+**SPEAKER_00:**
+[01:06] These were the scrappy days.
+
+**SPEAKER_01:**
+[01:07] Yeah.
+
+**SPEAKER_00:**
+[01:08] Manually configuring air conditioning... I think the amount of like, furniture assembly that you do is like a good proxy for you are in... In your startup journey.
+
+**SPEAKER_01:**
+[01:09] There was a lot of furniture... I mean, we, we like... It was basically an empty room when we moved in there... And I think we moved in there a day or two before the hackathon actually started... So get everything running.
+
+**SPEAKER_00:**
+[01:10] And was this to like, sort of commemorate the launch, I think, or was it like right before the launch?
+
+**SPEAKER_01:**
+[01:11] It was, it was, it was right... It actually, you know, if you recall, at the time, we didn't know when the launch would be... Like, the... The dates were always shifting... Right... And we just said we kind of arbitrarily chose, like, we wanted to actually synchronize it with the launch, but because it was... Because we couldn't know exactly when the launch was, and even when they declared the date, it was still a little bit vague... Like, we were like, is that going to actually happen? So we... We kind of at some point had to arbitrarily chose the date and they... They more or less... What was the right date? Like, I think it was off by maybe a day or two.
+
+**SPEAKER_00:**
+[01:12] Yeah... So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[01:13] I'm talking about the second one.
+
+**SPEAKER_00:**
+[01:14] Yeah, the second one... Also, the offices had shifted... So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote... I remember there was like a... There's like a horse Lineage app... Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon... But that one was open to externals... Right... So that was the big difference... And it actually was, you know, quite well attended... The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall... And you think that one was like 24 hours or it was two days... I can't remember.
+
+**SPEAKER_01:**
+[01:15] I think it was two days... And yeah, like the air conditioning thing... So we move... Moved into that space to have the hackathon, like, you know, consensus was playing because they had outgrown that co-working space already... And so we moved into that space, which can, you know, was a reasonably sized room... Like, you could probably get 80 to 100 people in that room... Right... But yes, the air conditioning was terrible and we had to frantically... We only realized this after we got into the room, so we had to like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+[01:16] Okay, I do have a memory of that.
+
+**SPEAKER_01:**
+[01:17] Yeah, I don't know if you recall that, but yeah, we were like, trying to like, get those air conditioning units in place before a ton of people showed up because, yeah, like, we were sweating when there were only like five people in the room.
+
+**SPEAKER_00:**
+[01:18] These were the scrappy days.
+
+**SPEAKER_01:**
+[01:19] Yeah.
+
+**SPEAKER_00:**
+[01:20] Manually configuring air conditioning... I think the amount of like, furniture assembly that you do is like a good proxy for you are in... In your startup journey.
+
+**SPEAKER_01:**
+[01:21] There was a lot of furniture... I mean, we, we like... It was basically an empty room when we moved in there... And I think we moved in there a day or two before the hackathon actually started... So get everything running.
+
+**SPEAKER_00:**
+[01:22] And was this to like, sort of commemorate the launch, I think, or was it like right before the launch?
+
+**SPEAKER_01:**
+[01:23] It was, it was, it was right... It actually, you know, if you recall, at the time, we didn't know when the launch would be... Like, the... The dates were always shifting... Right... And we just said we kind of arbitrarily chose, like, we wanted to actually synchronize it with the launch, but because it was... Because we couldn't know exactly when the launch was, and even when they declared the date, it was still a little bit vague... Like, we were like, is that going to actually happen? So we... We kind of at some point had to arbitrarily chose the date and they... They more or less... What was the right date? Like, I think it was off by maybe a day or two.
+
+**SPEAKER_00:**
+[01:24] Yeah... So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[01:25] I'm talking about the second one.
+
+**SPEAKER_00:**
+[01:26] Yeah, the second one... Also, the offices had shifted... So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote... I remember there was like a... There's like a horse Lineage app... Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon... But that one was open to externals... Right... So that was the big difference... And it actually was, you know, quite well attended... The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall... And you think that one was like 24 hours or it was two days... I can't remember.
+
+**SPEAKER_01:**
+[01:27] I think it was two days... And yeah, like the air conditioning thing... So we move... Moved into that space to have the hackathon, like, you know, consensus was playing because they had outgrown that co-working space already... And so we moved into that space, which can, you know, was a reasonably sized room... Like, you could probably get 80 to 100 people in that room... Right... But yes, the air conditioning was terrible and we had to frantically... We only realized this after we got into the room, so we had to like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+[01:28] Okay, I do have a memory of that.
+
+**SPEAKER_01:**
+[01:29] Yeah, I don't know if you recall that, but yeah, we were like, trying to like, get those air conditioning units in place before a ton of people showed up because, yeah, like, we were sweating when there were only like five people in the room.
+
+**SPEAKER_00:**
+[01:30] These were the scrappy days.
+
+**SPEAKER_01:**
+[01:31] Yeah.
+
+**SPEAKER_00:**
+[01:32] Manually configuring air conditioning... I think the amount of like, furniture assembly that you do is like a good proxy for you are in... In your startup journey.
+
+**SPEAKER_01:**
+[01:33] There was a lot of furniture... I mean, we, we like... It was basically an empty room when we moved in there... And I think we moved in there a day or two before the hackathon actually started... So get everything running.
+
+**SPEAKER_00:**
+[01:34] And was this to like, sort of commemorate the launch, I think, or was it like right before the launch?
+
+**SPEAKER_01:**
+[01:35] It was, it was, it was right... It actually, you know, if you recall, at the time, we didn't know when the launch would be... Like, the... The dates were always shifting... Right... And we just said we kind of arbitrarily chose, like, we wanted to actually synchronize it with the launch, but because it was... Because we couldn't know exactly when the launch was, and even when they declared the date, it was still a little bit vague... Like, we were like, is that going to actually happen? So we... We kind of at some point had to arbitrarily chose the date and they... They more or less... What was the right date? Like, I think it was off by maybe a day or two.
+
+**SPEAKER_00:**
+[01:36] Yeah... So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[01:37] I'm talking about the second one.
+
+**SPEAKER_00:**
+[01:38] Yeah, the second one... Also, the offices had shifted... So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote... I remember there was like a... There's like a horse Lineage app... Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon... But that one was open to externals... Right... So that was the big difference... And it actually was, you know, quite well attended... The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall... And you think that one was like 24 hours or it was two days... I can't remember.
+
+**SPEAKER_01:**
+[01:39] I think it was two days... And yeah, like the air conditioning thing... So we move... Moved into that space to have the hackathon, like, you know, consensus was playing because they had outgrown that co-working space already... And so we moved into that space, which can, you know, was a reasonably sized room... Like, you could probably get 80 to 100 people in that room... Right... But yes, the air conditioning was terrible and we had to frantically... We only realized this after we got into the room, so we had to like, frantically buy some and set them up.
+
+**SPEAKER_00:**
+[01:40] Okay, I do have a memory of that.
+
+**SPEAKER_01:**
+[01:41] Yeah, I don't know if you recall that, but yeah, we were like, trying to like, get those air conditioning units in place before a ton of people showed up because, yeah, like, we were sweating when there were only like five people in the room.
+
+**SPEAKER_00:**
+[01:42] These were the scrappy days.
+
+**SPEAKER_01:**
+[01:43] Yeah.
+
+**SPEAKER_00:**
+[01:44] Manually configuring air conditioning... I think the amount of like, furniture assembly that you do is like a good proxy for you are in... In your startup journey.
+
+**SPEAKER_01:**
+[01:45] There was a lot of furniture... I mean, we, we like... It was basically an empty room when we moved in there... And I think we moved in there a day or two before the hackathon actually started... So get everything running.
+
+**SPEAKER_00:**
+[01:46] And was this to like, sort of commemorate the launch, I think, or was it like right before the launch?
+
+**SPEAKER_01:**
+[01:47] It was, it was, it was right... It actually, you know, if you recall, at the time, we didn't know when the launch would be... Like, the... The dates were always shifting... Right... And we just said we kind of arbitrarily chose, like, we wanted to actually synchronize it with the launch, but because it was... Because we couldn't know exactly when the launch was, and even when they declared the date, it was still a little bit vague... Like, we were like, is that going to actually happen? So we... We kind of at some point had to arbitrarily chose the date and they... They more or less... What was the right date? Like, I think it was off by maybe a day or two.
+
+**SPEAKER_00:**
+[01:48] Yeah... So, okay, and this... So... So you're talking about the second one.
+
+**SPEAKER_01:**
+[01:49] I'm talking about the second one.
+
+**SPEAKER_00:**
+[01:50] Yeah, the second one... Also, the offices had shifted... So we had our consensus, which we were kind of working as a part of at that time, had moved to a much larger office in Bushwick, which is... I... I believe they still have a presence there, though they've gone mostly remote... I remember there was like a... There's like a horse Lineage app... Yeah, pretty interesting, you know, um, and we ended up actually hiring a couple people who participated in... In the hackathon... But that one was open to externals... Right... So that was the big difference... And it actually was, you know, quite well attended... The room, I think, never had the greatest air conditioning, but it was really quite hot in there, if I recall... And you think that one was like

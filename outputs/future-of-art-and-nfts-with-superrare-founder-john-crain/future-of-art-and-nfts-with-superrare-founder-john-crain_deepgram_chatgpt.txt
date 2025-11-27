@@ -1,0 +1,121 @@
+**SPEAKER_00:**
+Okay.
+We are live, and we have a very special episode today.
+We are talking about the future of art and NFTs,
+and we're joined by special guest and very old friend,
+John Crain.
+Welcome, John Crain.
+
+**SPEAKER_01:**
+Hey, Victor.
+Hey, everyone.
+Hey.
+Good to see you guys.
+Thanks for having me.
+
+**SPEAKER_00:**
+John Crain, of course, as everyone knows, is the founder of SuperRare.
+But do you wanna give a quick intro for anyone who is not intimately familiar with all the amazing things you've done over the past couple of years?
+
+**SPEAKER_01:**
+Yeah, sure.
+So yeah, let's see.
+My crypto journey started in around 2015,
+going to the ConsenSys hackathon where I met at least, you know, three of the other folks on this call there.
+Before that, my background is kind of in art and technology.
+I worked in advertising.
+I studied architecture and structural engineering for undergrad.
+And yeah, I was always really interested in when crypto and blockchain were gonna intersect more with kind of the consumer tech and just things that were a little bit past finance and trading.
+And so, yeah, when I saw NFTs, it was an instant win for digital art.
+So yeah, I doubled down immediately.
+
+**SPEAKER_00:**
+Yeah. Remember—
+
+**SPEAKER_03:**
+How you heard about the hackathon or Ethereum generally?
+Obviously, we met there, but what was that—
+
+**SPEAKER_01:**
+Yeah. Well—
+
+**SPEAKER_03:**
+Your—yeah.
+
+**SPEAKER_01:**
+So I was kind of hanging—
+Okay, I was wrong.
+Like, this is actually super cool.
+I have no problem changing.
+I was like, I was totally wrong.
+This is amazing.
+And I was just googling "Ethereum blockchain hackathon."
+I was trying to find—like, get deeper involved.
+I was trying to quit my day job and go full-time crypto.
+And so then I think I just googled it, and it was like, oh shit, there's this hackathon in two weeks.
+And I applied with Charles.
+And then, yeah, met you guys.
+
+**SPEAKER_00:**
+Yeah. And to be clear, to let everyone know,
+we were blown away by you and your brother Charles' project,
+and we gave you, I think, your first job—both of you—in Web3, right?
+We gave you the—
+
+**SPEAKER_01:**
+Yeah. Yeah. For sure. Exactly.
+I think the Monday after—
+I don't know. I feel like I immediately quit and started working with you guys full-time on BlockApps.
+
+**SPEAKER_00:**
+Yeah.
+I think we tried to give you a job on the spot because you guys were—
+
+**SPEAKER_01:**
+Yeah. Yeah. Exactly.
+
+**SPEAKER_02:**
+I remember there was like a couple-week consulting—
+
+**SPEAKER_03:**
+Transition period while—
+
+**SPEAKER_01:**
+You know? Yeah. I think that's true.
+Maybe it was like we started hourly, like, getting to know each other a little bit, and then full-time. So yeah.
+
+**SPEAKER_02:**
+So with Counterparty, you could have been on—
+
+**SPEAKER_01:**
+Yeah. Exactly.
+
+**SPEAKER_00:**
+If only.
+So what inspired SuperRare?
+Like, I know when you were working with us, you kind of became our head of product, and you were working on a bunch of those enterprise implementations.
+But what triggered you to create SuperRare, which is, for anyone who doesn't know, one of the first NFT platforms really out there?
+
+**SPEAKER_01:**
+Yeah.
+Well, I mean, it was super interesting, right?
+We were all kind of on the ground floor at the ConsenSys office—or at least me and Kieran were hanging out there.
+Watching the ICO boom happen was fascinating.
+Me and Kieran talked a bunch about ERC-20 tokens, and I found it super interesting that it was this very small bit of standard—like, it's a super simple protocol, very simple code.
+But the adoption created this massive wealth generation.
+And even if there were also lots of scams, I'd say generally net positive for humans and the economy.
+It was incredible to see that happen.
+And so then I saw some of the standards conversations around ERC-721, and I saw the CryptoPunks launch.
+And I was like, oh, this is pretty crazy.
+If you think about the consumer web, it's all an image and a title tag and some metadata.
+So it could be that the entire consumer web turns into NFTs.
+I don't know exactly what the business model is going to look like, but the total addressable market is probably pretty large.
+So that got me into NFTs.
+And then on the flip side of that, I was also kind of in and around the New York art scene, going to the art fairs.
+I had friends who were looking for gallery representation and kind of part of the business of art.
+And it just seemed obvious.
+I was like, oh, there's now a way to truly own digital assets,
+and this is obviously going to apply to digital art.
+So it was kind of like the marriage of my interest in the tech side, but then also my interest and passions around art.
+
+(Transcript continues in next message due to length)
