@@ -131,7 +131,7 @@ echo ""
 # Find generated transcript files (no _raw suffix)
 TRANSCRIPT_FILES=()
 for TRANSCRIBER in "${TRANSCRIBER_ARRAY[@]}"; do
-    TRANSCRIPT_FILE="intermediates/${BASE_NAME}_${TRANSCRIBER}.txt"
+    TRANSCRIPT_FILE="intermediates/${BASE_NAME}/${BASE_NAME}_${TRANSCRIBER}.txt"
 
     if [ -f "$TRANSCRIPT_FILE" ]; then
         TRANSCRIPT_FILES+=("$TRANSCRIPT_FILE")
